@@ -88,6 +88,18 @@ def run(
         cfg = load_config(Path(".preflight/core.yml"))
         result = execute(cfg, suites=suite or None, fail_fast=fail_fast)
         location = write_artifacts(result, Path(cfg.artifact_directory))
+        for row in result.results:
+            typer.echo(f"{row.status.upper()} {row.test_id} severity={row.severity}")
+        typer.echo(
+            "COUNTS "
+            f"passed={result.summary.passed} failed={result.summary.failed} "
+            f"skipped={result.summary.skipped} error={result.summary.error} "
+            f"findings={result.summary.findings}"
+        )
+        typer.echo(
+            f"DECISION assertion={result.assertion_gate_status} final={result.gate_status} "
+            f"cleanup={result.cleanup_status}"
+        )
         prefix = "PREFLIGHT_RESULT" if ci else result.gate_status
         typer.echo(
             f"{prefix} gate={result.gate_status} profile=reference "

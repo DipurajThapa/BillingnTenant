@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 from preflight.catalog import CATALOG
@@ -17,18 +18,38 @@ def test_reference_core_passes_with_explicit_provenance() -> None:
     assert result.gate_status == "PASS"
     assert result.verification_level == "reference_verified"
     assert len(result.results) == 36
+    assert result.summary.skipped == 1
+    seat_result = next(x for x in result.results if x.test_id == "BILL-011")
+    assert seat_result.skip_reason == "feature_absent"
     assert "stripe" in result.unverified_scopes
     assert all(x.kind == "reference" for x in result.components)
 
 
 def test_each_core_defect_is_detected_by_its_scenario() -> None:
     for scenario in CATALOG:
-        if scenario.suite == "usage_reference":
+        if scenario.suite == "usage_reference" or scenario.feature_guard == "seat_billing":
             continue
         result = execute(example_config(), ReferenceTarget(defects={scenario.id}))
         failed = [x.test_id for x in result.results if x.status == "failed"]
         assert failed == [scenario.id]
-        assert result.gate_status == "FAIL"
+        assert result.gate_status == ("WARN" if scenario.severity == "medium" else "FAIL")
+
+
+def test_feature_gates_and_medium_promotion_follow_configuration() -> None:
+    config = example_config()
+    config.features.multi_org_users = False
+    config.features.membership_management = False
+    result = execute(config)
+    skipped = {x.test_id for x in result.results if x.status == "skipped"}
+    assert skipped == {"TEN-006", "TEN-007", "RBAC-004", "RBAC-005", "BILL-010", "BILL-011"}
+    assert result.gate_status == "PASS"
+
+    medium = execute(example_config(), ReferenceTarget(defects={"RBAC-004"}))
+    assert medium.assertion_gate_status == "WARN"
+    promoted_config = example_config()
+    promoted_config.policy.fail_medium = True
+    promoted = execute(promoted_config, ReferenceTarget(defects={"RBAC-004"}))
+    assert promoted.assertion_gate_status == "FAIL"
 
 
 def test_artifacts_are_valid_offline_and_reference_only(tmp_path: Path) -> None:
@@ -40,6 +61,9 @@ def test_artifacts_are_valid_offline_and_reference_only(tmp_path: Path) -> None:
     assert "Reference verification only" in html
     assert "http://" not in html and "https://" not in html
     assert (location / "journal.jsonl").exists()
+    if os.name == "posix":
+        assert (location.stat().st_mode & 0o777) == 0o700
+        assert (location / "run.json").stat().st_mode & 0o777 == 0o600
 
 
 def test_runtime_and_cleanup_failures_are_incomplete() -> None:

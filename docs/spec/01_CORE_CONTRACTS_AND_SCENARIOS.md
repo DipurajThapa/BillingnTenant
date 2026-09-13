@@ -543,3 +543,4 @@ Provider/deferred namespaces `STR_*`, `SUP_*`, `HTTP_*`, `GHA_*`, `A11Y_*`, `CPA
 ## 8. Hard limits
 
 Core configurable ceilings: concurrency 4, interruption grace 60 seconds, roles 20, plans 20, capabilities 100, scenario definitions 200, evidence items per scenario 50, evidence serialized size per scenario 64 KiB, total JSON artifact 10 MiB. Defaults: concurrency 4, grace 10 seconds. Above-ceiling config fails before execution.
+

@@ -8,13 +8,13 @@
 
 | Phase | State | Evidence |
 | --- | --- | --- |
-| C1 | Complete | strict models/config/diagnostics; Python 3.11 clean-wheel smoke |
-| C2 | Complete | provider-neutral ports, immutable catalog, local reference implementation, no external imports |
-| C3 | Complete | lifecycle, deterministic gates, typed runtime failure, fail-fast coverage, cleanup outcome |
-| C4 | Complete | tenant/RBAC/entitlement catalog and correct/defective reference validation |
-| C5 | Complete | billing/event/usage catalog and correct/defective reference validation |
-| C6 | Complete | console, canonical JSON, journal, sanitized responsive offline HTML and regeneration |
-| C7 | Complete | executable traceability, scope isolation, acceptance and clean-package validation |
+| C1 | In progress | strict models/config/diagnostics and clean-wheel smoke pass; exact diagnostic-path coverage remains |
+| C2 | In progress | provider-neutral signatures/catalog/no-external-import checks pass; full reference port implementations remain |
+| C3 | In progress | gates, fail-fast coverage and cleanup validation pass; complete fixture lifecycle/interruption behavior remains |
+| C4 | In progress | catalog, applicability and defect detection pass; stateful tenant/RBAC/entitlement port execution remains |
+| C5 | In progress | catalog, severity and defect detection pass; stateful billing/event/usage port execution remains |
+| C6 | In progress | console/JSON/journal/responsive offline HTML pass structural tests; final manual browser matrix remains |
+| C7 | In progress | bidirectional specification traceability and package checks pass; closes only after C1–C6 |
 
 The phase table records the prior implementation checkpoint. A post-integration audit found CLI
 contract and authoritative-document packaging drift, so the overall release claim remains under
@@ -23,7 +23,7 @@ revalidation until those deviations and any further specification mismatches are
 ## Final validation evidence
 
 - CPython: 3.11.16.
-- Automated tests: 50 passed, no skips or expected failures.
+- Automated tests: 59 passed, no skips or expected failures.
 - Ruff formatting/linting: passed.
 - Isolated wheel build: passed.
 - Clean environment wheel installation: passed.

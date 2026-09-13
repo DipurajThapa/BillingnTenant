@@ -405,3 +405,4 @@ Deviation rule: before implementation, record affected IDs, proposed behavior, r
 - Core reports may claim only reference verification.
 - Missing behavior becomes an error/incomplete result, not an inferred expectation.
 - Completion requires observable acceptance, not code presence or test-count targets.
+

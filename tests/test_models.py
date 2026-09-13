@@ -4,7 +4,16 @@ from decimal import Decimal
 import pytest
 from pydantic import ValidationError
 
-from preflight.models import ActorRef, AuthContext, MembershipRef, ScenarioResult, UsageProjection
+from preflight.config import example_config
+from preflight.engine import execute
+from preflight.models import (
+    ActorRef,
+    AuthContext,
+    MembershipRef,
+    RunResult,
+    ScenarioResult,
+    UsageProjection,
+)
 
 
 def test_models_reject_unknown_fields() -> None:
@@ -62,3 +71,21 @@ def test_scenario_status_requires_matching_detail() -> None:
     assert ScenarioResult(status="passed", **base).status == "passed"
     with pytest.raises(ValidationError):
         ScenarioResult(status="failed", **base)
+
+
+def test_run_result_rejects_gate_scope_and_finding_inconsistency() -> None:
+    result = execute(example_config())
+    payload = result.model_dump(mode="json", by_alias=True)
+    payload["gateStatus"] = "FAIL"
+    with pytest.raises(ValidationError, match="final gate"):
+        RunResult.model_validate(payload)
+
+    payload = result.model_dump(mode="json", by_alias=True)
+    payload["unverifiedScopes"].append(payload["verifiedScopes"][0])
+    with pytest.raises(ValidationError, match="overlap"):
+        RunResult.model_validate(payload)
+
+    payload = result.model_dump(mode="json", by_alias=True)
+    payload["components"] = []
+    with pytest.raises(ValidationError, match="provenance"):
+        RunResult.model_validate(payload)

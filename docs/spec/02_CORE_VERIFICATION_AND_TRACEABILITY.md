@@ -281,3 +281,4 @@ Core Development Baseline is development-ready and releasable only when:
 8. Reports visibly state reference-only scope.
 
 This completion authorizes core-engine development/release only. It does not authorize any external assurance claim.
+

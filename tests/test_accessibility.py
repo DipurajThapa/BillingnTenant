@@ -50,6 +50,11 @@ def test_status_and_scope_are_available_as_text_not_color_only() -> None:
     assert "Final gate: PASS" in text
     assert "Reference verification only." in text
     assert "PASSED" in text
+    assert "Decision summary" in text
+    assert "Incomplete causes" in text
+    assert "Findings" in text
+    assert "Fixture and cleanup" in text
+    assert "Limitations" in text
 
 
 def test_reflow_focus_contrast_and_user_spacing_compatibility_rules_exist() -> None:

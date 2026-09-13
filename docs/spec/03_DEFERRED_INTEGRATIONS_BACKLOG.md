@@ -142,3 +142,4 @@ When activated, each item must receive requirement, test and acceptance IDs with
 ## 5. Deferred status
 
 All six items are **non-blocking deferred work** for Version 1.5 Core Development Baseline. No unresolved decision in this document prevents core implementation or core acceptance. Each becomes a release blocker only after it is explicitly activated for a named later release.
+

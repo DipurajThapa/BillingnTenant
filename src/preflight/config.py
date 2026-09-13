@@ -1,5 +1,7 @@
 """Strict core configuration and suite resolution."""
 
+import re
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Literal
 
@@ -36,6 +38,16 @@ class Suites(StrictModel):
 
 class Policy(StrictModel):
     fail_medium: bool = False
+
+
+class Plan(StrictModel):
+    entitlements: list[str]
+
+
+class Capability(StrictModel):
+    required_permission: str | None = None
+    required_entitlement: str | None = None
+    operation: str
 
 
 class BillingPolicy(StrictModel):
@@ -80,8 +92,8 @@ class CoreConfig(StrictModel):
     features: Features = Field(default_factory=Features)
     roles: list[str] = Field(min_length=1, max_length=20)
     role_permissions: dict[str, list[str]]
-    plans: dict[str, dict[str, list[str]]] = Field(max_length=20)
-    capabilities: dict[str, dict[str, str | None]] = Field(max_length=100)
+    plans: dict[str, Plan] = Field(max_length=20)
+    capabilities: dict[str, Capability] = Field(max_length=100)
     billing_policy: BillingPolicy
     consistency: Consistency = Field(default_factory=Consistency)
     usage_policy: UsagePolicy | None = None
@@ -92,8 +104,44 @@ class CoreConfig(StrictModel):
 
     @model_validator(mode="after")
     def cross_references(self) -> "CoreConfig":
+        identifier = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
+        identifiers = (
+            self.roles
+            + list(self.role_permissions)
+            + list(self.plans)
+            + list(self.capabilities)
+            + [permission for values in self.role_permissions.values() for permission in values]
+            + [item for plan in self.plans.values() for item in plan.entitlements]
+        )
+        if any(not identifier.fullmatch(value) for value in identifiers):
+            raise ValueError("IDs must use lowercase letters, digits and underscores")
+        if len(self.roles) != len(set(self.roles)):
+            raise ValueError("roles must be unique")
+        if any(len(values) != len(set(values)) for values in self.role_permissions.values()):
+            raise ValueError("role permissions must be unique")
+        if any(
+            len(plan.entitlements) != len(set(plan.entitlements)) for plan in self.plans.values()
+        ):
+            raise ValueError("plan entitlements must be unique")
         if set(self.role_permissions) != set(self.roles):
             raise ValueError("rolePermissions keys must exactly match roles")
+        declared_permissions = {
+            permission for values in self.role_permissions.values() for permission in values
+        }
+        declared_entitlements = {
+            entitlement for plan in self.plans.values() for entitlement in plan.entitlements
+        }
+        for capability in self.capabilities.values():
+            if (
+                capability.required_permission is not None
+                and capability.required_permission not in declared_permissions
+            ):
+                raise ValueError("capability requiredPermission must resolve")
+            if (
+                capability.required_entitlement is not None
+                and capability.required_entitlement not in declared_entitlements
+            ):
+                raise ValueError("capability requiredEntitlement must resolve")
         if self.billing_policy.trial_plan not in self.plans:
             raise ValueError("trial plan must exist")
         if self.billing_policy.trial_end_behavior == "free" and "free" not in self.plans:
@@ -102,6 +150,22 @@ class CoreConfig(StrictModel):
             raise ValueError("meteredUsage and usagePolicy must be enabled together")
         if self.features.seat_billing != (self.seat_policy is not None):
             raise ValueError("seatBilling and seatPolicy must be enabled together")
+        if not set(self.billing_policy.unknown_plan_entitlements) <= declared_entitlements:
+            raise ValueError("unknownPlanEntitlements must resolve")
+        if self.billing_policy.past_due_behavior != "grace_period":
+            if self.billing_policy.grace_period_seconds != 0:
+                raise ValueError("gracePeriodSeconds must be zero outside grace_period mode")
+        if self.usage_policy is not None:
+            if set(self.usage_policy.quotas_by_plan) != set(self.plans):
+                raise ValueError("quotasByPlan keys must exactly match plans")
+            try:
+                quotas = [Decimal(value) for value in self.usage_policy.quotas_by_plan.values()]
+            except InvalidOperation:
+                raise ValueError("usage quotas must be finite non-negative decimals") from None
+            if any(not value.is_finite() or value < 0 for value in quotas):
+                raise ValueError("usage quotas must be finite non-negative decimals")
+            if "usage_reference" not in self.suites.enabled:
+                raise ValueError("meteredUsage requires explicit usage_reference suite")
         resolve_suites(self.suites.enabled, self.features.metered_usage)
         return self
 
@@ -146,10 +210,15 @@ def example_config() -> CoreConfig:
             "pro": {"entitlements": ["dashboard", "export", "generation"]},
         },
         capabilities={
-            "export": {"requiredPermission": "export", "requiredEntitlement": "export"},
+            "export": {
+                "requiredPermission": "export",
+                "requiredEntitlement": "export",
+                "operation": "export",
+            },
             "billing_settings": {
                 "requiredPermission": "billing_settings",
                 "requiredEntitlement": None,
+                "operation": "billing_settings",
             },
         },
         billingPolicy={"trialPlan": "pro", "trialDays": 14},

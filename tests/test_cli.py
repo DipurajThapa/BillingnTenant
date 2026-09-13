@@ -14,10 +14,14 @@ def test_end_to_end_cli_workflow(tmp_path: Path, monkeypatch) -> None:
     assert runner.invoke(app, ["init", "--non-interactive"]).exit_code == 2
     assert runner.invoke(app, ["doctor", "--ci"]).exit_code == 0
     catalog = runner.invoke(app, ["catalog", "--json"])
-    assert len(json.loads(catalog.stdout)) == 42
+    catalog_rows = json.loads(catalog.stdout)
+    assert len(catalog_rows) == 42
+    assert all(row["title"] and row["port_dependencies"] for row in catalog_rows)
     run = runner.invoke(app, ["run", "--ci"])
     assert run.exit_code == 0
     assert "PREFLIGHT_RESULT gate=PASS profile=reference" in run.stdout
+    assert "COUNTS passed=" in run.stdout
+    assert "DECISION assertion=PASS final=PASS cleanup=completed" in run.stdout
     run_files = list(Path(".preflight/runs").glob("*/run.json"))
     assert len(run_files) == 1
     assert runner.invoke(app, ["report", str(run_files[0])]).exit_code == 0

@@ -194,6 +194,7 @@ class ScenarioResult(StrictModel):
     observed: str
     skip_reason: str | None = None
     error_code: str | None = None
+    evidence: list[Evidence] = Field(default_factory=list, max_length=50)
     finding_id: str | None = None
 
     @model_validator(mode="after")
@@ -250,6 +251,18 @@ class RunResult(StrictModel):
 
     @model_validator(mode="after")
     def check_run(self) -> "RunResult":
+        if self.finished_at is not None and self.finished_at < self.started_at:
+            raise ValueError("finishedAt precedes startedAt")
+        if not self.components or any(
+            not item.name or not item.version for item in self.components
+        ):
+            raise ValueError("component provenance is incomplete")
+        if len(self.verified_scopes) != len(set(self.verified_scopes)) or len(
+            self.unverified_scopes
+        ) != len(set(self.unverified_scopes)):
+            raise ValueError("verification scopes must be unique")
+        if set(self.verified_scopes) & set(self.unverified_scopes):
+            raise ValueError("verified and unverified scopes overlap")
         counts = {
             s: sum(x.status == s for x in self.results)
             for s in ("passed", "failed", "skipped", "error")
@@ -261,7 +274,12 @@ class RunResult(StrictModel):
         if len({x.test_id for x in self.results}) != len(self.results):
             raise ValueError("duplicate scenario result")
         findings = {x.id: x for x in self.findings}
+        if len(findings) != len(self.findings):
+            raise ValueError("duplicate finding")
+        linked_findings: set[str] = set()
         for row in self.results:
+            if row.suite not in self.selected_suites:
+                raise ValueError("result suite was not selected")
             if row.finding_id:
                 finding = findings.get(row.finding_id)
                 if (
@@ -270,16 +288,34 @@ class RunResult(StrictModel):
                     or finding.severity != row.severity
                 ):
                     raise ValueError("finding differs from failed scenario")
+                linked_findings.add(row.finding_id)
+        if linked_findings != set(findings):
+            raise ValueError("orphan finding")
+        serious_failure = any(
+            row.status == "failed" and row.severity in {"blocker", "high"} for row in self.results
+        )
+        medium_failure = any(
+            row.status == "failed" and row.severity == "medium" for row in self.results
+        )
+        if serious_failure and self.assertion_gate_status != "FAIL":
+            raise ValueError("assertion gate differs from results")
+        if not serious_failure and not medium_failure and self.assertion_gate_status != "PASS":
+            raise ValueError("assertion gate differs from results")
+        if medium_failure and self.assertion_gate_status not in {"WARN", "FAIL"}:
+            raise ValueError("assertion gate differs from results")
+        incomplete = (
+            self.execution_status != "completed"
+            or self.cleanup_status in {"partial", "failed"}
+            or bool(self.missing_coverage)
+            or any(row.status == "error" for row in self.results)
+        )
+        expected_final = "INCOMPLETE" if incomplete else self.assertion_gate_status
+        if self.gate_status != expected_final:
+            raise ValueError("final gate differs from execution state")
         if self.execution_profile == "reference":
             if any(x.kind != "reference" for x in self.components):
                 raise ValueError("reference run contains external component")
-            complete = (
-                self.execution_status == "completed"
-                and self.gate_status != "INCOMPLETE"
-                and self.cleanup_status in {"not_required", "completed"}
-                and not self.missing_coverage
-            )
-            expected = "reference_verified" if complete else "integration_incomplete"
+            expected = "integration_incomplete" if incomplete else "reference_verified"
             if self.verification_level != expected:
                 raise ValueError("invalid reference verification level")
         return self

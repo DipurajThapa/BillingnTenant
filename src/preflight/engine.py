@@ -3,6 +3,7 @@
 import hashlib
 import html as html_lib
 import json
+import os
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -25,7 +26,9 @@ UNVERIFIED = [
 
 def calculate_gate(results: list[ScenarioResult], fail_medium: bool = False) -> str:
     failures = [x for x in results if x.status == "failed"]
-    if any(x.severity in {"blocker", "high"} for x in failures) or (fail_medium and failures):
+    if any(x.severity in {"blocker", "high"} for x in failures) or (
+        fail_medium and any(x.severity == "medium" for x in failures)
+    ):
         return "FAIL"
     return "WARN" if failures else "PASS"
 
@@ -42,6 +45,21 @@ def execute(
     rows: list[ScenarioResult] = []
     findings: list[Finding] = []
     for scenario in selected(chosen):
+        if scenario.feature_guard and not getattr(config.features, scenario.feature_guard):
+            rows.append(
+                ScenarioResult(
+                    testId=scenario.id,
+                    suite=scenario.suite,
+                    severity=scenario.severity,
+                    applicability="conditional",
+                    status="skipped",
+                    durationMs=0,
+                    expected="feature-gated reference oracle satisfied when enabled",
+                    observed="feature disabled",
+                    skipReason="feature_absent",
+                )
+            )
+            continue
         try:
             passed, observed = target.evaluate(scenario.id)
         except Exception:
@@ -50,7 +68,7 @@ def execute(
                     testId=scenario.id,
                     suite=scenario.suite,
                     severity=scenario.severity,
-                    applicability="required",
+                    applicability=scenario.coverage,
                     status="error",
                     durationMs=0,
                     expected="reference oracle satisfied",
@@ -66,7 +84,7 @@ def execute(
             testId=scenario.id,
             suite=scenario.suite,
             severity=scenario.severity,
-            applicability="required",
+            applicability=scenario.coverage,
             status="passed" if passed else "failed",
             durationMs=0,
             expected="reference oracle satisfied",
@@ -87,7 +105,7 @@ def execute(
                     remediationHint="Correct the behavior represented by the defect toggle",
                 )
             )
-    assertion = calculate_gate(rows)
+    assertion = calculate_gate(rows, config.policy.fail_medium)
     missing = [x.id for x in selected(chosen) if x.id not in {row.test_id for row in rows}]
     cleanup_status = "completed"
     try:
@@ -100,7 +118,7 @@ def execute(
     summary = RunSummary(
         passed=sum(x.status == "passed" for x in rows),
         failed=sum(x.status == "failed" for x in rows),
-        skipped=0,
+        skipped=sum(x.status == "skipped" for x in rows),
         error=sum(x.status == "error" for x in rows),
         findings=len(findings),
     )
@@ -133,13 +151,19 @@ def execute(
 
 
 def write_artifacts(result: RunResult, root: Path) -> Path:
+    data = result.model_dump(mode="json", by_alias=True)
+    serialized = json.dumps(data, indent=2, sort_keys=True)
+    if len(serialized.encode("utf-8")) > 10 * 1024 * 1024:
+        raise ValueError("RPT_RENDER_FAILED: JSON artifact exceeds 10 MiB")
+    report = render_html(result)
     run_dir = root / result.run_id
     run_dir.mkdir(parents=True, exist_ok=False, mode=0o700)
-    data = result.model_dump(mode="json", by_alias=True)
-    (run_dir / "run.json").write_text(json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
-    report = render_html(result)
-    (run_dir / "preflight-report.html").write_text(report, encoding="utf-8")
-    (run_dir / "journal.jsonl").write_text(
+    run_json = run_dir / "run.json"
+    html_report = run_dir / "preflight-report.html"
+    journal = run_dir / "journal.jsonl"
+    run_json.write_text(serialized, encoding="utf-8")
+    html_report.write_text(report, encoding="utf-8")
+    journal.write_text(
         json.dumps(
             {
                 "schemaVersion": "1.0",
@@ -152,6 +176,9 @@ def write_artifacts(result: RunResult, root: Path) -> Path:
         + "\n",
         encoding="utf-8",
     )
+    if os.name == "posix":
+        for path in (run_json, html_report, journal):
+            path.chmod(0o600)
     return run_dir
 
 
@@ -162,9 +189,43 @@ def render_html(result: RunResult) -> str:
         f"<td><span class='status status-{html_lib.escape(x.status)}'>"
         f"{html_lib.escape(x.status.upper())}</span></td>"
         f"<td>{html_lib.escape(x.severity.upper())}</td>"
+        f"<td>{html_lib.escape(x.expected)}</td>"
+        f"<td>{html_lib.escape(x.observed)}</td>"
         "</tr>"
         for x in result.results
     )
+    findings = (
+        "".join(
+            "<article class='finding'>"
+            f"<h3>{html_lib.escape(item.id)}: {html_lib.escape(item.severity.upper())}</h3>"
+            f"<p><strong>Impact:</strong> {html_lib.escape(item.impact)}</p>"
+            f"<p><strong>Expected:</strong> {html_lib.escape(item.expected)}</p>"
+            f"<p><strong>Observed:</strong> {html_lib.escape(item.observed)}</p>"
+            f"<p><strong>Remediation:</strong> {html_lib.escape(item.remediation_hint)}</p>"
+            "</article>"
+            for item in result.findings
+        )
+        or "<p>No findings.</p>"
+    )
+    incomplete_causes = sorted(
+        set(result.missing_coverage)
+        | {row.error_code for row in result.results if row.error_code}
+        | set(result.diagnostics)
+    )
+    incomplete = (
+        "<ul>"
+        + "".join(f"<li><code>{html_lib.escape(value)}</code></li>" for value in incomplete_causes)
+        + "</ul>"
+        if incomplete_causes
+        else "<p>None.</p>"
+    )
+    cleanup_notice = (
+        "<p class='scope'><strong>Cleanup requires attention.</strong> "
+        f"Run <code>preflight clean {html_lib.escape(result.run_id)}</code>.</p>"
+        if result.cleanup_status in {"partial", "failed"}
+        else "<p>Reference cleanup completed.</p>"
+    )
+    components = html_lib.escape(", ".join(f"{x.name} {x.version}" for x in result.components))
     html = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -201,12 +262,31 @@ No external provider or customer environment was tested.</p></header>
 <dt>Profile</dt><dd>{html_lib.escape(result.execution_profile)}</dd>
 <dt>Verification</dt><dd>{html_lib.escape(result.verification_level)}</dd>
 <dt>Assertion gate</dt><dd>{html_lib.escape(result.assertion_gate_status)}</dd>
-<dt>Cleanup</dt><dd>{html_lib.escape(result.cleanup_status)}</dd></dl></section>
+<dt>Cleanup</dt><dd>{html_lib.escape(result.cleanup_status)}</dd>
+<dt>Suites</dt><dd>{html_lib.escape(", ".join(result.selected_suites))}</dd>
+<dt>Components</dt><dd>{components}</dd>
+</dl></section>
+<section aria-labelledby="counts-heading"><h2 id="counts-heading">Decision summary</h2><dl>
+<dt>Passed</dt><dd>{result.summary.passed}</dd><dt>Failed</dt><dd>{result.summary.failed}</dd>
+<dt>Skipped</dt><dd>{result.summary.skipped}</dd><dt>Error</dt><dd>{result.summary.error}</dd>
+<dt>Findings</dt><dd>{result.summary.findings}</dd></dl></section>
+<section aria-labelledby="incomplete-heading"><h2 id="incomplete-heading">Incomplete causes</h2>
+{incomplete}</section>
+<section aria-labelledby="findings-heading"><h2 id="findings-heading">Findings</h2>
+{findings}</section>
 <section aria-labelledby="coverage-heading"><h2 id="coverage-heading">Scenario coverage</h2>
 <div class="table-wrap" role="region" aria-labelledby="coverage-heading" tabindex="0">
 <table><caption>Selected scenario results</caption><thead><tr>
 <th scope="col">Scenario</th><th scope="col">Status</th><th scope="col">Severity</th>
-</tr></thead><tbody>{rows}</tbody></table></div></section></main>
+<th scope="col">Expected</th><th scope="col">Observed</th>
+</tr></thead><tbody>{rows}</tbody></table></div></section>
+<section aria-labelledby="cleanup-heading"><h2 id="cleanup-heading">Fixture and cleanup</h2>
+{cleanup_notice}</section>
+<section aria-labelledby="limits-heading"><h2 id="limits-heading">Limitations</h2>
+<p>Unverified scopes: {html_lib.escape(", ".join(result.unverified_scopes))}.</p>
+<p>This result does not establish penetration-test, compliance, production-hosting,
+or formal accessibility conformance.</p>
+</section></main>
 <footer><p>Generated by SaaS Preflight {html_lib.escape(result.tool_version)}.</p></footer>
 </div></body></html>"""
     return html

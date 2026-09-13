@@ -1,32 +1,92 @@
 schemaVersion: "1.0"
 entries:
-  - requirementId: DATA-001-005
-    testIds: [DAT-001-012]
-    acceptanceIds: [AC-002, AC-003]
-  - requirementId: CFG-001-003
-    testIds: [CFG-001-014]
-    acceptanceIds: [AC-004, AC-005]
+  - requirementId: PRD-001-003
+    testIds: [RUN-001-005, PORT-001-012, SCN-ALL]
+    acceptanceIds: [AC-001, AC-002, AC-006, AC-008, AC-009]
+  - requirementId: PRD-004-005
+    testIds: [SCOPE-001-003, PROV-001-006]
+    acceptanceIds: [AC-003, AC-013]
+  - requirementId: PRD-006
+    testIds: [SCN-ALL, DEF-ALL]
+    acceptanceIds: [AC-008, AC-009]
+  - requirementId: VER-001-002
+    testIds: [PROV-001-006, RPT-003, RPT-009]
+    acceptanceIds: [AC-003, AC-011]
+  - requirementId: WF-001
+    testIds: [CLI-001-005]
+    acceptanceIds: [AC-004]
+  - requirementId: WF-002
+    testIds: [CLI-006-008]
+    acceptanceIds: [AC-005]
+  - requirementId: WF-003
+    testIds: [RUN-001-005, GATE-001-007]
+    acceptanceIds: [AC-006, AC-007]
+  - requirementId: WF-004
+    testIds: [CLN-001-006]
+    acceptanceIds: [AC-010]
+  - requirementId: WF-005
+    testIds: [RPT-001-002]
+    acceptanceIds: [AC-011]
+  - requirementId: WF-006
+    testIds: [CLI-009]
+    acceptanceIds: [AC-005]
   - requirementId: ARC-001-006
     testIds: [ARCH-001-006, PORT-001-012]
     acceptanceIds: [AC-001, AC-002]
-  - requirementId: WF-001-006
-    testIds: [CLI-001-009, RUN-001-005]
-    acceptanceIds: [AC-004, AC-005, AC-006]
-  - requirementId: SCN-TEN-RBAC-BILL-WEB-ENT-USG
-    testIds: [TEN-001-USG-006, DEF-TEN-001-DEF-USG-006]
-    acceptanceIds: [AC-008, AC-009]
-  - requirementId: UI-001-004
-    testIds: [RPT-001-009]
-    acceptanceIds: [AC-011, AC-012]
+  - requirementId: STA-001-005
+    testIds: [GATE-001-007, COV-001-003, ERR-001-007]
+    acceptanceIds: [AC-006, AC-007]
   - requirementId: SEC-CORE-001-005
-    testIds: [SEC-001-008]
+    testIds: [SEC-001-008, SCOPE-001-002]
     acceptanceIds: [AC-002, AC-003, AC-010]
-  - requirementId: PRD-004-005
-    testIds: [SCOPE-001-003]
-    acceptanceIds: [AC-013]
-  - requirementId: TST-006
-    testIds: [TRACE-001]
-    acceptanceIds: [AC-014]
+  - requirementId: ERR-001-005
+    testIds: [ERR-001-007, CLN-001-006, DIA-001-004]
+    acceptanceIds: [AC-006, AC-010]
+  - requirementId: UI-001-004
+    testIds: [RPT-003-009]
+    acceptanceIds: [AC-011, AC-012]
+  - requirementId: OPS-001-003
+    testIds: [OPS-001-005, PKG-001]
+    acceptanceIds: [AC-001, AC-011]
+  - requirementId: DATA-001-005
+    testIds: [DAT-001-012, PROV-001-006]
+    acceptanceIds: [AC-002, AC-003, AC-011]
+  - requirementId: CFG-001-003
+    testIds: [CFG-001-014]
+    acceptanceIds: [AC-004, AC-005]
+  - requirementId: PORT-001-007
+    testIds: [PORT-001-012, ARCH-001-006]
+    acceptanceIds: [AC-002, AC-006]
+  - requirementId: SCN-TEN
+    testIds: [TEN-001-007, DEF-TEN-001-007]
+    acceptanceIds: [AC-008, AC-009]
+  - requirementId: SCN-RBAC
+    testIds: [RBAC-001-005, DEF-RBAC-001-005]
+    acceptanceIds: [AC-008, AC-009]
+  - requirementId: SCN-BILL
+    testIds: [BILL-001-012, DEF-BILL-001-012]
+    acceptanceIds: [AC-008, AC-009]
+  - requirementId: SCN-WEB
+    testIds: [WEB-001-007, DEF-WEB-001-007]
+    acceptanceIds: [AC-008, AC-009]
+  - requirementId: SCN-ENT
+    testIds: [ENT-001-005, DEF-ENT-001-005]
+    acceptanceIds: [AC-008, AC-009]
+  - requirementId: SCN-USG
+    testIds: [USG-001-006, DEF-USG-001-006]
+    acceptanceIds: [AC-008, AC-009]
+  - requirementId: EVD-001-002
+    testIds: [EVD-001-004, RPT-003]
+    acceptanceIds: [AC-010, AC-011]
+  - requirementId: JRN-001
+    testIds: [CLN-001-006, OPS-001-003]
+    acceptanceIds: [AC-010, AC-011]
+  - requirementId: LIM-001-005
+    testIds: [LIM-001-005]
+    acceptanceIds: [AC-002]
+  - requirementId: TST-001-006
+    testIds: [TRACE-001, SCN-ALL, DEF-ALL]
+    acceptanceIds: [AC-008, AC-009, AC-014]
   - requirementId: SUP-001-005
     testIds: [SUP-CONTRACT-001-005, SUP-LIVE-001-007]
     acceptanceIds: [SUP-AC-001, SUP-AC-002, SUP-AC-003]
