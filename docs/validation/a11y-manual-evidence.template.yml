@@ -1,0 +1,37 @@
+schemaVersion: "1.0"
+reportSha256: "REPLACE_WITH_LOWERCASE_SHA256"
+testedAt: "REPLACE_WITH_UTC_TIMESTAMP"
+reviewer: "REPLACE_WITH_APPROVED_DISPLAY_NAME"
+environments:
+  - screenReader: NVDA
+    screenReaderVersion: "REPLACE"
+    browser: Chrome
+    browserVersion: "REPLACE"
+    operatingSystem: "Windows 11 REPLACE_BUILD"
+    checks:
+      - {id: A11Y-MAN-001, status: not_run, notes: ""}
+      - {id: A11Y-MAN-002, status: not_run, notes: ""}
+      - {id: A11Y-MAN-003, status: not_run, notes: ""}
+      - {id: A11Y-MAN-004, status: not_run, notes: ""}
+      - {id: A11Y-MAN-005, status: not_run, notes: ""}
+      - {id: A11Y-MAN-006, status: not_run, notes: ""}
+      - {id: A11Y-MAN-007, status: not_run, notes: ""}
+      - {id: A11Y-MAN-008, status: not_run, notes: ""}
+      - {id: A11Y-MAN-009, status: not_run, notes: ""}
+      - {id: A11Y-MAN-010, status: not_run, notes: ""}
+  - screenReader: Narrator
+    screenReaderVersion: "REPLACE"
+    browser: Edge
+    browserVersion: "REPLACE"
+    operatingSystem: "Windows 11 REPLACE_BUILD"
+    checks:
+      - {id: A11Y-MAN-001, status: not_run, notes: ""}
+      - {id: A11Y-MAN-002, status: not_run, notes: ""}
+      - {id: A11Y-MAN-003, status: not_run, notes: ""}
+      - {id: A11Y-MAN-004, status: not_run, notes: ""}
+      - {id: A11Y-MAN-005, status: not_run, notes: ""}
+      - {id: A11Y-MAN-006, status: not_run, notes: ""}
+      - {id: A11Y-MAN-007, status: not_run, notes: ""}
+      - {id: A11Y-MAN-008, status: not_run, notes: ""}
+      - {id: A11Y-MAN-009, status: not_run, notes: ""}
+      - {id: A11Y-MAN-010, status: not_run, notes: ""}

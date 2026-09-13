@@ -90,3 +90,6 @@ entries:
   - requirementId: SUP-001-005
     testIds: [SUP-CONTRACT-001-005, SUP-LIVE-001-007]
     acceptanceIds: [SUP-AC-001, SUP-AC-002, SUP-AC-003]
+  - requirementId: A11Y-REQ-001-004
+    testIds: [A11Y-AUTO-001-004, A11Y-EVD-001-003, A11Y-MAN-001-010]
+    acceptanceIds: [A11Y-AC-001, A11Y-AC-002, A11Y-AC-003, A11Y-AC-004]

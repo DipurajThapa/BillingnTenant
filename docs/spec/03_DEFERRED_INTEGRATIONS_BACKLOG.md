@@ -95,17 +95,26 @@ Dependencies apply only to later integrated verification. They do not alter the 
 
 ### BL-A11Y — Formal accessibility conformance
 
-**Objective:** Select and verify a formal accessibility target for the HTML report and any later interactive UI.
+**Objective:** Verify the standalone HTML report against WCAG 2.2 Level AA.
 
-**Preserved now:** semantic HTML landmarks and tables; keyboard-operable native controls; visible focus; text status labels independent of color; ordered heading structure; responsive reflow; no required network or client-side framework. These are core usability requirements, not a conformance claim.
+**Activated boundary:** `A11Y-001` is the authoritative decision record. Semantic report behavior,
+automated Chromium/Firefox checks, contrast calculation, the evidence schema, and the manual protocol
+are implemented. Formal validation requires Windows 11 with NVDA/current Chrome and
+Narrator/current Edge. Evidence must pass all `A11Y-MAN-001` through `A11Y-MAN-010` checks in both
+environments and must be bound to the unchanged report by SHA-256.
 
-**Deferred decisions and work:** target standard and level; supported browser/assistive-technology matrix; automated rule set; manual keyboard and screen-reader protocol; contrast measurements; zoom/reflow thresholds beyond current responsive acceptance; VPAT or other documentation; remediation severity and release gate.
+**Remaining human work:** execute the protocol in
+`docs/validation/A11Y_WCAG_2_2_AA_MANUAL_PROTOCOL.md`, remediate any failures, and validate the
+completed evidence file with `scripts/validate_a11y_evidence.py`. A VPAT or third-party certification
+is not required by the current decision and must not be implied.
 
-**Activation condition:** the product owner selects a formal standard or a release requires a conformance claim.
+**Failure and recovery contract:** any failed or unexecuted manual check, missing environment,
+invalid evidence, or report digest mismatch blocks only the formal conformance claim. Correct the
+report or evidence, regenerate the final report when necessary, and repeat both environments after
+any report HTML/CSS change.
 
-**Failure and recovery contract:** conformance failures block only the formal claim/release gate defined at activation; reports remain usable with the core semantic fallback while defects are tracked.
-
-**Later acceptance outcome:** independent automated and manual evidence supports the declared standard, scope, platform matrix, and exceptions. Core responsive tests alone cannot support this claim.
+**Acceptance outcome:** `A11Y-AC-001` through `A11Y-AC-004` pass. Automated results alone never
+authorize a formal conformance claim.
 
 ### BL-CPANEL — cPanel-specific deployment
 
@@ -147,7 +156,7 @@ When activated, each item must receive requirement, test and acceptance IDs with
 | BL-SUPABASE | Activated; named test integration verified | Project alias `rsrztmgozovtjmbstlje`; not production or another customer/project |
 | BL-STRIPE | Deferred | No Stripe environment or billing flow verified |
 | BL-GITHUB | Activated | Repository build and evidence automation only |
-| BL-A11Y | Activated; implementation and cross-browser automation complete | WCAG 2.2 AA formal conformance remains pending human screen-reader/manual protocol |
+| BL-A11Y | Activated; automated implementation and manual evidence gate complete | WCAG 2.2 AA formal conformance remains pending human NVDA/Narrator execution |
 | BL-CPANEL | Deferred | No hosting environment verified |
 
 All items remain non-blocking for the Version 1.5 Core Development Baseline. An activated item

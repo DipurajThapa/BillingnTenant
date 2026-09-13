@@ -19,7 +19,7 @@
 ## Final validation evidence
 
 - CPython: 3.11.16.
-- Automated tests: 92 passed, no skips or expected failures.
+- Automated tests: 95 passed, no skips or expected failures.
 - Ruff formatting/linting: passed.
 - Isolated wheel build: passed.
 - Clean environment wheel installation: passed.
@@ -56,8 +56,9 @@ Activation evidence: workflow run `34750679159` completed successfully on Python
 Remote HTTP safety has been implemented through decision `HTTP-001` as an optional external transport. Its security controls are covered by the current 50-test repository suite. Supabase exercises this transport against its named test project; other real targets remain unverified until their hostname, operation map, authorization and credentials are approved.
 
 Accessibility implementation has been activated through `A11Y-001` with WCAG 2.2 AA as the target.
-Structural and automated Chromium/Firefox acceptance pass. A formal conformance claim remains
-pending the recorded human screen-reader/manual protocol.
+Structural and automated Chromium/Firefox acceptance pass. The evidence schema, exact-artifact
+digest validator and repeatable human protocol are implemented. A formal conformance claim remains
+pending successful execution with NVDA/Chrome and Narrator/Edge on Windows 11.
 
 ## Release boundary
 
