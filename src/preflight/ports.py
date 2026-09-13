@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from decimal import Decimal
+from inspect import isawaitable
 from typing import Protocol
 
 from preflight.models import (
@@ -71,3 +72,50 @@ class ProbeTransport(Protocol):
 class ClockPort(Protocol):
     def now(self) -> datetime: ...
     def tick(self, count: int = 1) -> datetime: ...
+
+
+REQUIRED_METHODS = {
+    "FixturePort": {"provision", "cleanup"},
+    "IdentityTenantPort": {
+        "auth_context",
+        "switch_tenant",
+        "set_role",
+        "remove_membership",
+        "execute",
+    },
+    "BillingStatePort": {
+        "bind_account",
+        "get_binding",
+        "create_subscription",
+        "transition",
+        "projection",
+        "entitlements",
+    },
+    "EventDeliveryPort": {
+        "deliver",
+        "current_object_version",
+        "side_effect_count",
+        "fail_next_delivery",
+        "restart",
+    },
+    "UsagePort": {"record", "projection"},
+    "ProbeTransport": {"execute"},
+    "ClockPort": {"now", "tick"},
+}
+
+
+def validate_port_set(port_set: dict[str, object]) -> None:
+    for name, methods in REQUIRED_METHODS.items():
+        implementation = port_set.get(name)
+        if implementation is None or any(
+            not callable(getattr(implementation, method, None)) for method in methods
+        ):
+            raise ValueError(f"PORT_MISSING: {name}")
+    transport = port_set["ProbeTransport"]
+    if getattr(transport, "kind", None) != "reference":
+        raise ValueError("CORE_EXTERNAL_NOT_ENABLED")
+
+
+async def normalize_port_result(value):
+    """Normalize either a synchronous return value or an awaitable port return."""
+    return await value if isawaitable(value) else value

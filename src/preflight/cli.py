@@ -10,9 +10,18 @@ import yaml
 
 from preflight import __version__
 from preflight.catalog import CATALOG
-from preflight.config import example_config, load_config
+from preflight.config import (
+    ReferenceOverrides,
+    example_config,
+    load_config,
+    load_reference_overrides,
+)
 from preflight.engine import execute, render_html, write_artifacts
+from preflight.lifecycle import FixtureJournal, validate_journal
 from preflight.models import RunResult
+from preflight.ports import validate_port_set
+from preflight.reference import ReferenceTarget
+from preflight.reference_ports import build_reference_ports
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -38,27 +47,60 @@ def init(
     current initializer has no prompts, so new-project output is identical in
     either mode.
     """
-    del non_interactive
-    path = Path(".preflight/core.yml")
-    if path.exists() and not force:
-        typer.echo("CFG_INVALID: configuration exists; use --force", err=True)
-        raise typer.Exit(2)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    content = yaml.safe_dump(
+    paths = [Path(".preflight/core.yml"), Path(".preflight/reference.yml")]
+    existing = [path for path in paths if path.exists()]
+    if existing and not force:
+        if non_interactive:
+            typer.echo("CFG_INVALID: configuration exists; use --force", err=True)
+            raise typer.Exit(2)
+        if not typer.confirm("Replace existing Preflight configuration?"):
+            typer.echo("cancelled; no files changed")
+            return
+    paths[0].parent.mkdir(parents=True, exist_ok=True)
+    core_content = yaml.safe_dump(
         example_config().model_dump(mode="json", by_alias=True), sort_keys=False
     )
-    temp = path.with_suffix(".tmp")
-    temp.write_text(content, encoding="utf-8")
-    load_config(temp)
-    temp.replace(path)
-    typer.echo(str(path))
+    reference_content = yaml.safe_dump(
+        ReferenceOverrides().model_dump(mode="json", by_alias=True), sort_keys=False
+    )
+    originals = {path: path.read_bytes() if path.exists() else None for path in paths}
+    temps = [path.with_suffix(".tmp") for path in paths]
+    try:
+        temps[0].write_text(core_content, encoding="utf-8")
+        temps[1].write_text(reference_content, encoding="utf-8")
+        load_config(temps[0])
+        load_reference_overrides(temps[1])
+        for temp, path in zip(temps, paths, strict=True):
+            temp.replace(path)
+    except Exception:
+        for path, content in originals.items():
+            if content is None:
+                path.unlink(missing_ok=True)
+            else:
+                path.write_bytes(content)
+        for temp in temps:
+            temp.unlink(missing_ok=True)
+        typer.echo("CFG_INVALID: atomic initialization failed", err=True)
+        raise typer.Exit(2) from None
+    typer.echo("\n".join(str(path) for path in paths))
 
 
 @app.command()
 def doctor(ci: bool = False) -> None:
     try:
         cfg = load_config(Path(".preflight/core.yml"))
-        typer.echo(f"PASS CORE_CONFIG_VALID profile={cfg.profile}" if ci else "PASS configuration")
+        load_reference_overrides(Path(".preflight/reference.yml"))
+        checks = [
+            ("CORE_CONFIG_VALID", f"profile={cfg.profile}"),
+            ("CORE_REFERENCE_VALID", "target=bundled-reference"),
+        ]
+        validate_port_set(build_reference_ports(ReferenceTarget(), FixtureJournal("doctor")))
+        checks.append(("CORE_PORTS_VALID", "ports=7"))
+        artifact = Path(cfg.artifact_directory)
+        artifact.parent.mkdir(parents=True, exist_ok=True)
+        checks.append(("CORE_OUTPUT_VALID", f"path={cfg.artifact_directory}"))
+        for code, detail in checks:
+            typer.echo(f"PASS {code} {detail}" if ci else f"PASS {detail}")
     except ValueError as exc:
         typer.echo(f"FAIL {exc}", err=True)
         raise typer.Exit(2) from None
@@ -75,7 +117,12 @@ def show_catalog(
         typer.echo(json.dumps([x.__dict__ for x in rows], sort_keys=True))
     else:
         for item in rows:
-            typer.echo(f"{item.id} {item.severity.upper()} {item.suite}")
+            dependencies = ",".join(item.port_dependencies) or "none"
+            typer.echo(
+                f"{item.id} {item.severity.upper()} {item.suite} "
+                f"applicability={item.coverage} ports={dependencies} "
+                f"verification={item.verification_level} title={item.title}"
+            )
 
 
 @app.command()
@@ -139,21 +186,12 @@ def clean(run_id: str) -> None:
         typer.echo("CLN_JOURNAL_INVALID", err=True)
         raise typer.Exit(2)
     try:
-        entries = [json.loads(line) for line in journal.read_text(encoding="utf-8").splitlines()]
-        if not entries:
-            raise ValueError
-        for sequence, entry in enumerate(entries, start=1):
-            if (
-                entry.get("schemaVersion") != "1.0"
-                or entry.get("runId") != run_id
-                or entry.get("sequence") != sequence
-                or entry.get("adapterKind") != "reference"
-            ):
-                raise ValueError
+        entries = validate_journal(journal, run_id)
     except (OSError, ValueError, json.JSONDecodeError):
         typer.echo("CLN_JOURNAL_INVALID", err=True)
         raise typer.Exit(2) from None
-    typer.echo("completed; reference fixtures already absent")
+    registered = sum(entry.event == "fixture_registered" for entry in entries)
+    typer.echo(f"completed; reference fixtures absent registered={registered}")
 
 
 def main() -> None:

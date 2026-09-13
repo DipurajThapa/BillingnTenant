@@ -9,9 +9,13 @@ from preflight.engine import execute
 from preflight.models import (
     ActorRef,
     AuthContext,
+    Evidence,
+    FixtureSet,
     MembershipRef,
+    ResourceRef,
     RunResult,
     ScenarioResult,
+    TenantFixture,
     UsageProjection,
 )
 
@@ -89,3 +93,21 @@ def test_run_result_rejects_gate_scope_and_finding_inconsistency() -> None:
     payload["components"] = []
     with pytest.raises(ValidationError, match="provenance"):
         RunResult.model_validate(payload)
+
+
+def test_fixture_set_rejects_unregistered_nested_resource() -> None:
+    created = datetime(2026, 1, 1, tzinfo=UTC)
+    nested = ResourceRef(kind="record", externalId="one", runId="run", createdAt=created)
+    tenant = TenantFixture(id="t1", alias="TA", resources={"one": nested})
+    with pytest.raises(ValidationError, match="absent"):
+        FixtureSet(runId="run", tenants={"TA": tenant}, actors={}, resources=[])
+
+
+def test_evidence_model_rejects_nested_sensitive_field() -> None:
+    with pytest.raises(ValidationError, match="EVD_SENSITIVE_VALUE"):
+        Evidence(
+            type="observation",
+            source="TEN-001",
+            timestamp=datetime(2026, 1, 1, tzinfo=UTC),
+            payload={"nested": {"accessToken": "secret"}},
+        )

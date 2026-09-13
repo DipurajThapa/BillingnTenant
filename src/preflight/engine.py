@@ -4,6 +4,7 @@ import hashlib
 import html as html_lib
 import json
 import os
+import shutil
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -11,8 +12,10 @@ from pathlib import Path
 from preflight import __version__
 from preflight.catalog import selected
 from preflight.config import CoreConfig, resolve_suites
+from preflight.lifecycle import FixtureJournal
 from preflight.models import ComponentProvenance, Finding, RunResult, RunSummary, ScenarioResult
 from preflight.reference import ReferenceTarget
+from preflight.reference_ports import ReferenceFixturePort
 
 UNVERIFIED = [
     "stripe",
@@ -41,10 +44,26 @@ def execute(
 ) -> RunResult:
     target = target or ReferenceTarget()
     chosen = resolve_suites(suites or config.suites.enabled, config.features.metered_usage)
+    run_id = uuid.uuid4().hex
+    journal = FixtureJournal(run_id)
+    fixture_port = ReferenceFixturePort(target, journal)
     started = datetime.now(UTC)
     rows: list[ScenarioResult] = []
     findings: list[Finding] = []
-    for scenario in selected(chosen):
+    scenarios = selected(chosen)
+    fixtures = None
+    execution_status = "completed"
+    diagnostics: list[str] = []
+    try:
+        fixtures = fixture_port.provision(run_id, [item.id for item in scenarios])
+    except Exception:
+        from preflight.models import FixtureSet
+
+        fixtures = FixtureSet(runId=run_id, tenants={}, actors={}, resources=journal.registered())
+        execution_status = "error"
+        diagnostics.append("PORT_INVALID_RETURN")
+
+    for scenario in scenarios if execution_status == "completed" else []:
         if scenario.feature_guard and not getattr(config.features, scenario.feature_guard):
             rows.append(
                 ScenarioResult(
@@ -62,6 +81,10 @@ def execute(
             continue
         try:
             passed, observed = target.evaluate(scenario.id, config)
+        except KeyboardInterrupt:
+            execution_status = "interrupted"
+            diagnostics.append("CORE_INTERRUPTED")
+            break
         except Exception:
             rows.append(
                 ScenarioResult(
@@ -106,14 +129,19 @@ def execute(
                 )
             )
     assertion = calculate_gate(rows, config.policy.fail_medium)
-    missing = [x.id for x in selected(chosen) if x.id not in {row.test_id for row in rows}]
+    missing = [x.id for x in scenarios if x.id not in {row.test_id for row in rows}]
     cleanup_status = "completed"
     try:
+        fixture_port.cleanup(run_id, fixtures)
         target.cleanup()
-    except Exception:
-        cleanup_status = "failed"
+    except Exception as exc:
+        cleanup_status = "partial" if "CLN_PARTIAL" in str(exc) else "failed"
+        diagnostics.append("CLN_PARTIAL" if cleanup_status == "partial" else "CLN_FAILED")
     incomplete = bool(
-        missing or any(x.status == "error" for x in rows) or cleanup_status == "failed"
+        execution_status != "completed"
+        or missing
+        or any(x.status == "error" for x in rows)
+        or cleanup_status in {"partial", "failed"}
     )
     summary = RunSummary(
         passed=sum(x.status == "passed" for x in rows),
@@ -123,8 +151,8 @@ def execute(
         findings=len(findings),
     )
     config_json = json.dumps(config.model_dump(mode="json", by_alias=True), sort_keys=True)
-    return RunResult(
-        runId=uuid.uuid4().hex,
+    result = RunResult(
+        runId=run_id,
         toolVersion=__version__,
         catalogVersion="1.0",
         executionProfile="reference",
@@ -136,7 +164,11 @@ def execute(
         finishedAt=datetime.now(UTC),
         configHash=hashlib.sha256(config_json.encode()).hexdigest(),
         selectedSuites=chosen,
-        executionStatus="error" if incomplete else "completed",
+        executionStatus=(
+            execution_status
+            if execution_status != "completed"
+            else ("error" if incomplete else "completed")
+        ),
         assertionGateStatus=assertion,
         gateStatus="INCOMPLETE" if incomplete else assertion,
         cleanupStatus=cleanup_status,
@@ -144,10 +176,15 @@ def execute(
         results=rows,
         findings=findings,
         missingCoverage=missing,
-        diagnostics=["SCN_UNEXPECTED"]
-        if any(x.status == "error" for x in rows)
-        else (["CLN_FAILED"] if cleanup_status == "failed" else []),
+        diagnostics=list(
+            dict.fromkeys(
+                diagnostics
+                + (["SCN_UNEXPECTED"] if any(x.status == "error" for x in rows) else [])
+            )
+        ),
     )
+    result._journal = journal
+    return result
 
 
 def write_artifacts(result: RunResult, root: Path) -> Path:
@@ -160,29 +197,30 @@ def write_artifacts(result: RunResult, root: Path) -> Path:
     resolved_root = root.resolve()
     if not resolved_root.is_relative_to(workspace):
         raise ValueError("RPT_RENDER_FAILED: artifact directory escapes workspace")
+    resolved_root.mkdir(parents=True, exist_ok=True, mode=0o700)
     run_dir = resolved_root / result.run_id
-    run_dir.mkdir(parents=True, exist_ok=False, mode=0o700)
-    run_json = run_dir / "run.json"
-    html_report = run_dir / "preflight-report.html"
-    journal = run_dir / "journal.jsonl"
-    run_json.write_text(serialized, encoding="utf-8")
-    html_report.write_text(report, encoding="utf-8")
-    journal.write_text(
-        json.dumps(
-            {
-                "schemaVersion": "1.0",
-                "runId": result.run_id,
-                "sequence": 1,
-                "event": "run_created",
-                "adapterKind": "reference",
-            }
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-    if os.name == "posix":
-        for path in (run_json, html_report, journal):
-            path.chmod(0o600)
+    staging = resolved_root / f".{result.run_id}.tmp"
+    if run_dir.exists() or staging.exists():
+        raise ValueError("RPT_RENDER_FAILED: run artifact path already exists")
+    try:
+        staging.mkdir(mode=0o700)
+        run_json = staging / "run.json"
+        html_report = staging / "preflight-report.html"
+        journal = staging / "journal.jsonl"
+        run_json.write_text(serialized, encoding="utf-8")
+        html_report.write_text(report, encoding="utf-8")
+        if isinstance(result._journal, FixtureJournal):
+            result._journal.write(journal)
+        else:
+            FixtureJournal(result.run_id).write(journal)
+        if os.name == "posix":
+            for path in (run_json, html_report, journal):
+                path.chmod(0o600)
+        staging.replace(run_dir)
+    except Exception:
+        if staging.exists():
+            shutil.rmtree(staging)
+        raise
     try:
         return run_dir.relative_to(workspace)
     except ValueError:

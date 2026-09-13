@@ -10,6 +10,7 @@ from preflight.models import (
     BillingProjection,
     EventEnvelope,
     EventReceipt,
+    Observation,
     UsageProjection,
 )
 
@@ -22,6 +23,10 @@ class ReferenceTarget:
     defects: set[str] = field(default_factory=set)
     errors: set[str] = field(default_factory=set)
     cleanup_error: bool = False
+    provision_error_at: int | None = None
+    cleanup_fixture_fail_ids: set[str] = field(default_factory=set)
+    created_fixture_ids: set[str] = field(default_factory=set)
+    fail_next_event_type: str | None = None
     resources: dict[str, tuple[str, str]] = field(
         default_factory=lambda: {"a1": ("TA", "A"), "b1": ("TB", "B")}
     )
@@ -145,6 +150,30 @@ class ReferenceTarget:
             tenant_id, BillingProjection(tenantId=tenant_id, plan=None, status="inactive")
         )
 
+    def entitlements(self, tenant_id: str) -> list[str]:
+        if self.projection(tenant_id).status not in {"trialing", "active"}:
+            return []
+        return [self.plans.get(tenant_id, "")]
+
+    def execute(self, auth: AuthContext, request) -> Observation:
+        if auth.mode != "actor_session" or not auth.actor_id:
+            return Observation(outcome="denied", changed=False)
+        if request.operation == "read":
+            value = self.read_resource(auth.actor_id, request.resource_id or "")
+            return Observation(outcome="allowed" if value else "not_found", changed=False)
+        if request.operation == "delete":
+            changed = self.mutate_resource(auth.actor_id, request.resource_id or "", delete=True)
+            return Observation(outcome="allowed" if changed else "denied", changed=changed)
+        return Observation(
+            outcome="invalid", changed=False, errorCode="unsupported_operation"
+        )
+
+    def tick(self, count: int = 1) -> datetime:
+        if count < 0:
+            raise ValueError("tick count must be non-negative")
+        self.clock += timedelta(seconds=count)
+        return self.clock
+
     def deliver(self, event: EventEnvelope, auth: AuthContext) -> EventReceipt:
         if auth.mode != "signed_event" or auth.credential_handle != "reference:event":
             return EventReceipt(
@@ -152,6 +181,14 @@ class ReferenceTarget:
                 outcome="rejected",
                 stateChanged=False,
                 errorCode="invalid_signature",
+            )
+        if self.fail_next_event_type == event.event_type:
+            self.fail_next_event_type = None
+            return EventReceipt(
+                eventId=event.event_id,
+                outcome="failed",
+                stateChanged=False,
+                errorCode="reference_delivery_failure",
             )
         if event.event_type == "irrelevant":
             return EventReceipt(

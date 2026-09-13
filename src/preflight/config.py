@@ -40,6 +40,11 @@ class Policy(StrictModel):
     fail_medium: bool = False
 
 
+class ReferenceOverrides(StrictModel):
+    schema_version: Literal["1.0"] = "1.0"
+    target: Literal["bundled-reference"] = "bundled-reference"
+
+
 class Plan(StrictModel):
     entitlements: list[str]
 
@@ -203,9 +208,38 @@ def load_config(path: Path) -> CoreConfig:
         raw = yaml.safe_load(path.read_text(encoding="utf-8"))
         if not isinstance(raw, dict):
             raise ValueError("root must be a mapping")
+        if raw.get("profile", "reference") != "reference" or any(
+            key in raw for key in ("provider", "transport", "remote", "hosting", "ci")
+        ):
+            raise ValueError("CORE_EXTERNAL_NOT_ENABLED")
         return CoreConfig.model_validate(raw)
-    except (OSError, yaml.YAMLError, ValidationError, ValueError) as exc:
-        raise ValueError(f"CFG_INVALID: {exc}") from None
+    except ValidationError as exc:
+        types = {item["type"] for item in exc.errors()}
+        code = "CFG_UNKNOWN_FIELD" if "extra_forbidden" in types else "CFG_REFERENCE_INVALID"
+        if any(tuple(item["loc"]) == ("schemaVersion",) for item in exc.errors()):
+            code = "CFG_UNSUPPORTED_SCHEMA"
+        raise ValueError(f"{code}: configuration rejected") from None
+    except (OSError, yaml.YAMLError) as exc:
+        raise ValueError(f"CFG_INVALID: {type(exc).__name__}") from None
+    except ValueError as exc:
+        message = str(exc)
+        code = message if message == "CORE_EXTERNAL_NOT_ENABLED" else "CFG_INVALID"
+        raise ValueError(f"{code}: configuration rejected") from None
+
+
+def load_reference_overrides(path: Path) -> ReferenceOverrides:
+    try:
+        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        return ReferenceOverrides.model_validate(raw)
+    except ValidationError as exc:
+        code = (
+            "CFG_UNKNOWN_FIELD"
+            if any(item["type"] == "extra_forbidden" for item in exc.errors())
+            else "CFG_REFERENCE_INVALID"
+        )
+        raise ValueError(f"{code}: reference configuration rejected") from None
+    except (OSError, yaml.YAMLError, ValueError) as exc:
+        raise ValueError(f"CFG_INVALID: {type(exc).__name__}") from None
 
 
 def example_config() -> CoreConfig:

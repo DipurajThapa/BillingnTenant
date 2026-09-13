@@ -14,6 +14,7 @@ class Scenario:
     fixture_dependencies: tuple[str, ...] = ()
     port_dependencies: tuple[str, ...] = ()
     scenario_dependencies: tuple[str, ...] = ()
+    verification_level: str = "reference_verified"
     evidence_allowlist: tuple[str, ...] = (
         "fixture_alias",
         "operation",
@@ -100,6 +101,68 @@ CATALOG = tuple(
         features={i: "metered_usage" for i in range(1, 7)},
         ports=("fixture", "usage", "billing_state", "clock"),
     )
+)
+
+_TITLES = {
+    "TEN": (
+        "Cross-tenant exact read",
+        "Tenant-filtered list",
+        "Client tenant override",
+        "Owner reassignment",
+        "Foreign mutation",
+        "Tenant switch isolation",
+        "Revoked membership",
+    ),
+    "RBAC": (
+        "Direct admin operation",
+        "Billing settings authorization",
+        "Role downgrade propagation",
+        "Membership administration",
+        "Per-tenant role isolation",
+    ),
+    "BILL": (
+        "Account binding and subscription",
+        "Trial creation",
+        "Trial boundary",
+        "Plan upgrade",
+        "Plan downgrade",
+        "Cancellation",
+        "Failed renewal",
+        "Renewal recovery",
+        "Reactivation",
+        "Active-tenant billing binding",
+        "Seat quantity",
+        "Unknown plan fallback",
+    ),
+    "WEB": (
+        "Duplicate event ID",
+        "Duplicate logical version",
+        "Stale event ordering",
+        "Failed delivery retry",
+        "Invalid signature",
+        "Irrelevant event",
+        "Replay after restart",
+    ),
+    "ENT": (
+        "Plan capability matrix",
+        "Role-plan capability matrix",
+        "Downgrade entitlement propagation",
+        "Unknown entitlement",
+        "Direct unentitled operation",
+    ),
+    "USG": (
+        "Tenant usage isolation",
+        "Usage idempotency",
+        "Quota boundary",
+        "Plan-change usage",
+        "Stale usage projection",
+        "Usage tenant attribution",
+    ),
+}
+
+CATALOG = tuple(
+    Scenario(**{**item.__dict__, "title": _TITLES[item.id.split("-")[0]][int(item.id[-3:]) - 1]})
+    for item in CATALOG
 )
 
 BY_ID = {item.id: item for item in CATALOG}

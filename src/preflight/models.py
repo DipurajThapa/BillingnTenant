@@ -1,10 +1,11 @@
 """Strict provider-neutral C1 contracts."""
 
+import json
 from datetime import datetime
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, PrivateAttr, model_validator
 
 
 def _camel(value: str) -> str:
@@ -46,9 +47,18 @@ class FixtureSet(StrictModel):
             raise ValueError("actor key differs from alias")
         if any(value.run_id != self.run_id for value in self.resources):
             raise ValueError("resource run differs from fixture run")
+        nested = [
+            resource
+            for tenant in self.tenants.values()
+            for resource in tenant.resources.values()
+        ]
+        if any(value.run_id != self.run_id for value in nested):
+            raise ValueError("nested resource run differs from fixture run")
         keys = [(value.kind, value.external_id) for value in self.resources]
         if len(keys) != len(set(keys)):
             raise ValueError("resource IDs duplicate within kind")
+        if not {(value.kind, value.external_id) for value in nested} <= set(keys):
+            raise ValueError("nested resource is absent from fixture resources")
         return self
 
 
@@ -170,6 +180,23 @@ class Evidence(StrictModel):
     timestamp: datetime
     payload: dict[str, JsonValue] = Field(default_factory=dict)
 
+    @model_validator(mode="after")
+    def reject_sensitive_fields(self) -> "Evidence":
+        sensitive = ("password", "secret", "token", "api_key", "apikey", "credential")
+
+        def keys(value):
+            if isinstance(value, dict):
+                for key, item in value.items():
+                    yield str(key).lower()
+                    yield from keys(item)
+            elif isinstance(value, list):
+                for item in value:
+                    yield from keys(item)
+
+        if any(part in key for key in keys(self.payload) for part in sensitive):
+            raise ValueError("EVD_SENSITIVE_VALUE")
+        return self
+
 
 class Finding(StrictModel):
     id: str
@@ -205,6 +232,11 @@ class ScenarioResult(StrictModel):
             raise ValueError("error code conflicts with status")
         if (self.status == "failed") != (self.finding_id is not None):
             raise ValueError("finding conflicts with status")
+        evidence_json = json.dumps(
+            [item.model_dump(mode="json", by_alias=True) for item in self.evidence]
+        )
+        if len(evidence_json.encode()) > 64 * 1024:
+            raise ValueError("EVD_FIELD_REJECTED: scenario evidence exceeds 64 KiB")
         return self
 
 
@@ -223,6 +255,7 @@ class ComponentProvenance(StrictModel):
 
 
 class RunResult(StrictModel):
+    _journal: object | None = PrivateAttr(default=None)
     schema_version: Literal["1.0"] = "1.0"
     run_id: str
     tool_version: str

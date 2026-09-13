@@ -11,8 +11,11 @@ runner = CliRunner()
 def test_end_to_end_cli_workflow(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     assert runner.invoke(app, ["init", "--non-interactive"]).exit_code == 0
+    assert Path(".preflight/reference.yml").exists()
     assert runner.invoke(app, ["init", "--non-interactive"]).exit_code == 2
     assert runner.invoke(app, ["doctor", "--ci"]).exit_code == 0
+    doctor = runner.invoke(app, ["doctor", "--ci"])
+    assert "PASS CORE_PORTS_VALID ports=7" in doctor.stdout
     catalog = runner.invoke(app, ["catalog", "--json"])
     catalog_rows = json.loads(catalog.stdout)
     assert len(catalog_rows) == 42
@@ -86,3 +89,39 @@ def test_clean_rejects_invalid_external_and_wrong_run_journals(tmp_path: Path, m
     assert runner.invoke(app, ["clean", valid_run]).exit_code == 2
 
     assert runner.invoke(app, ["clean", "../escape"]).exit_code == 2
+
+
+def test_interactive_decline_preserves_both_configuration_files(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    assert runner.invoke(app, ["init", "--non-interactive"]).exit_code == 0
+    before = {path: path.read_bytes() for path in Path(".preflight").glob("*.yml")}
+    result = runner.invoke(app, ["init"], input="n\n")
+    assert result.exit_code == 0
+    assert "cancelled; no files changed" in result.stdout
+    assert {path: path.read_bytes() for path in Path(".preflight").glob("*.yml")} == before
+
+
+def test_force_initialization_rolls_back_both_files_if_commit_fails(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    assert runner.invoke(app, ["init", "--non-interactive"]).exit_code == 0
+    core = Path(".preflight/core.yml")
+    reference = Path(".preflight/reference.yml")
+    core.write_text("original-core")
+    reference.write_text("original-reference")
+    original_replace = Path.replace
+
+    def fail_second_replace(self, target):
+        if Path(target).name == "reference.yml":
+            raise OSError("simulated commit failure")
+        return original_replace(self, target)
+
+    monkeypatch.setattr(Path, "replace", fail_second_replace)
+    result = runner.invoke(app, ["init", "--force", "--non-interactive"])
+    assert result.exit_code == 2
+    assert core.read_text() == "original-core"
+    assert reference.read_text() == "original-reference"
+    assert not list(Path(".preflight").glob("*.tmp"))

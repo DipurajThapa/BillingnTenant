@@ -1,7 +1,9 @@
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
-from preflight.config import CoreConfig, resolve_suites
+from preflight.config import CoreConfig, load_config, resolve_suites
 
 
 def minimal_config() -> dict[str, object]:
@@ -89,3 +91,23 @@ def test_metering_requires_complete_valid_quotas_and_explicit_suite() -> None:
 def test_artifact_directory_must_remain_inside_workspace(path: str) -> None:
     with pytest.raises(ValidationError, match="workspace-relative"):
         CoreConfig.model_validate({**minimal_config(), "artifactDirectory": path})
+
+
+@pytest.mark.parametrize(
+    ("change", "code"),
+    [
+        ({"schemaVersion": "2.0"}, "CFG_UNSUPPORTED_SCHEMA"),
+        ({"unknown": True}, "CFG_UNKNOWN_FIELD"),
+        ({"profile": "external"}, "CORE_EXTERNAL_NOT_ENABLED"),
+        ({"roles": ["missing"]}, "CFG_REFERENCE_INVALID"),
+    ],
+)
+def test_load_config_reports_exact_owned_diagnostic(
+    tmp_path: Path, change: dict[str, object], code: str
+) -> None:
+    import yaml
+
+    path = tmp_path / "core.yml"
+    path.write_text(yaml.safe_dump({**minimal_config(), **change}))
+    with pytest.raises(ValueError, match=code):
+        load_config(path)

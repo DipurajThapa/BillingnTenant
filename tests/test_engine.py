@@ -130,3 +130,20 @@ def test_fail_fast_preserves_missing_coverage() -> None:
     result = execute(example_config(), ReferenceTarget(errors={"TEN-001"}), fail_fast=True)
     assert result.gate_status == "INCOMPLETE"
     assert result.missing_coverage
+
+
+def test_artifact_write_failure_leaves_no_partial_run(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    result = execute(example_config())
+    original_write = Path.write_text
+
+    def fail_html(self, *args, **kwargs):
+        if self.name == "preflight-report.html":
+            raise OSError("simulated reporter failure")
+        return original_write(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "write_text", fail_html)
+    with pytest.raises(OSError, match="reporter failure"):
+        write_artifacts(result, Path("artifacts"))
+    assert not (Path("artifacts") / result.run_id).exists()
+    assert not (Path("artifacts") / f".{result.run_id}.tmp").exists()

@@ -1,19 +1,19 @@
 # Project Status
 
 **Baseline:** Version 1.5 Core Development Baseline  
-**Overall state:** Core baseline revalidation and specification-alignment remediation in progress
+**Overall state:** Core implementation complete; one native-browser validation gate remains
 **Verification claim:** Core/reference verification and the named Supabase test integration are verified. No Stripe, customer target, production deployment, cPanel environment, or formal accessibility conformance has been verified.
 
 ## Phase gates
 
 | Phase | State | Evidence |
 | --- | --- | --- |
-| C1 | In progress | strict models/config/diagnostics and clean-wheel smoke pass; exact diagnostic-path coverage remains |
-| C2 | In progress | provider-neutral signatures/catalog/no-external-import checks pass; full reference port implementations remain |
-| C3 | In progress | gates, fail-fast coverage and cleanup validation pass; complete fixture lifecycle/interruption behavior remains |
+| C1 | Complete | strict models/config, exact owned diagnostic paths and clean-wheel package validation pass |
+| C2 | Complete | all seven bundled provider-neutral ports, catalog metadata, sync/async normalization and no-egress checks pass |
+| C3 | Complete | provisioning, atomic journal registration, interruption, partial failure, reverse cleanup and gates pass |
 | C4 | Complete | stateful tenant/RBAC/entitlement scenarios, applicability and isolated defect variants pass |
 | C5 | Complete | stateful billing/event/usage scenarios, policy variants and isolated defect variants pass |
-| C6 | In progress | console/JSON/journal/responsive offline HTML pass structural tests; final manual browser matrix remains |
+| C6 | In progress | evidence, console/JSON/journal, atomic artifacts and responsive offline HTML pass; native-browser viewport matrix is environment-blocked |
 | C7 | In progress | bidirectional specification traceability and package checks pass; closes only after C1–C6 |
 
 The phase table records the prior implementation checkpoint. A post-integration audit found CLI
@@ -23,7 +23,7 @@ revalidation until those deviations and any further specification mismatches are
 ## Final validation evidence
 
 - CPython: 3.11.16.
-- Automated tests: 71 passed, no skips or expected failures.
+- Automated tests: 90 passed, no skips or expected failures.
 - Ruff formatting/linting: passed.
 - Isolated wheel build: passed.
 - Clean environment wheel installation: passed.
