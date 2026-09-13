@@ -32,7 +32,9 @@
 
 ## Deferred, non-blocking work
 
-Stripe, Supabase, remote HTTP safety/hardening, GitHub Actions, formal accessibility conformance, and cPanel-specific deployment remain governed by `docs/spec/03_DEFERRED_INTEGRATIONS_BACKLOG.md`.
+Stripe, Supabase, remote HTTP safety/hardening, formal accessibility conformance, and cPanel-specific deployment remain governed by `docs/spec/03_DEFERRED_INTEGRATIONS_BACKLOG.md`.
+
+GitHub Actions has been activated through decision `GHA-001`. Its passing workflow verifies only repository build evidence and cannot change reference or external verification provenance.
 
 ## Release boundary
 
