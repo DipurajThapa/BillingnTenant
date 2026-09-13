@@ -26,6 +26,10 @@ def main() -> None:
     with httpx.Client(
         verify=True, follow_redirects=False, trust_env=False, timeout=timeout
     ) as client:
+        settings_response = client.get(f"{base_url}/auth/v1/settings", headers=headers)
+        if settings_response.status_code != 200:
+            raise RuntimeError(f"LIVE_KEY_REJECTED:{settings_response.status_code}")
+
         actor_secrets = {
             "A": ("SUPABASE_TEST_ACTOR_A_EMAIL", "SUPABASE_TEST_ACTOR_A_PASSWORD"),
             "B": ("SUPABASE_TEST_ACTOR_B_EMAIL", "SUPABASE_TEST_ACTOR_B_PASSWORD"),
@@ -42,7 +46,12 @@ def main() -> None:
                 },
             )
             if response.status_code != 200:
-                raise RuntimeError(f"LIVE_AUTH_FAILED:{alias}:{response.status_code}")
+                error_code = "auth_rejected"
+                with suppress(Exception):
+                    candidate = response.json().get("error_code")
+                    if isinstance(candidate, str) and candidate.replace("_", "").isalnum():
+                        error_code = candidate
+                raise RuntimeError(f"LIVE_AUTH_FAILED:{alias}:{response.status_code}:{error_code}")
             token = response.json().get("access_token")
             if not isinstance(token, str) or not token:
                 raise RuntimeError(f"LIVE_AUTH_RESPONSE_INVALID:{alias}")

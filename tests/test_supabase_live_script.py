@@ -16,5 +16,7 @@ def test_live_verifier_has_secret_and_cleanup_guardrails() -> None:
         assert f"secrets.{name}" in workflow
     assert "follow_redirects=False" in script
     assert "trust_env=False" in script
+    assert "LIVE_KEY_REJECTED" in script
+    assert "error_code" in script
     assert "preflight_delete_resource" in script
     assert 'print("SUPABASE_LIVE_VERIFICATION_PASS")' in script
