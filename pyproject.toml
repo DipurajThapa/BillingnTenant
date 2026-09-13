@@ -9,7 +9,8 @@ requires-python = ">=3.11,<3.12"
 dependencies = ["typer>=0.12,<1", "pydantic>=2.8,<3", "PyYAML>=6,<7", "Jinja2>=3.1,<4"]
 
 [project.optional-dependencies]
-dev = ["build>=1.2,<2", "pytest>=8.3,<9", "ruff>=0.6,<1"]
+http = ["httpx>=0.28,<1"]
+dev = ["build>=1.2,<2", "httpx>=0.28,<1", "pytest>=8.3,<9", "ruff>=0.6,<1"]
 
 [project.scripts]
 preflight = "preflight.cli:main"
@@ -26,4 +27,3 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
-
