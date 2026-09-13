@@ -7,6 +7,7 @@ def test_browser_verifier_covers_required_matrix_and_checks() -> None:
     source = path.read_text()
     ast.parse(source)
     assert "VIEWPORTS = (320, 375, 768, 1440)" in source
+    assert 'BROWSERS = ("chromium", "firefox")' in source
     for check in (
         "pageOverflow",
         "missingHeadings",
@@ -14,8 +15,12 @@ def test_browser_verifier_covers_required_matrix_and_checks() -> None:
         "tableVisible",
         "firstFocus",
         "skipTarget",
+        "nextFocus",
         "consoleErrors",
         "externalRequests",
+        "forced_colors",
+        "letter-spacing:.12em",
+        "word-spacing:.16em",
     ):
         assert check in source
 

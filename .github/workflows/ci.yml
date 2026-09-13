@@ -74,8 +74,8 @@ jobs:
       - name: Install browser verification dependencies
         run: python -m pip install --constraint constraints.txt --editable '.[browser]'
 
-      - name: Install isolated Chromium runtime
-        run: python -m playwright install --with-deps chromium
+      - name: Install isolated browser runtimes
+        run: python -m playwright install --with-deps chromium firefox
 
       - name: Verify report at required widths
         run: python scripts/verify_report_browser.py
