@@ -61,7 +61,7 @@ def execute(
             )
             continue
         try:
-            passed, observed = target.evaluate(scenario.id)
+            passed, observed = target.evaluate(scenario.id, config)
         except Exception:
             rows.append(
                 ScenarioResult(

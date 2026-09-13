@@ -76,3 +76,11 @@ def test_reference_usage_is_tenant_scoped_idempotent_and_nonnegative() -> None:
     assert target.usage_projection("TB", "calls").quantity == Decimal("1")
     with pytest.raises(ValueError):
         target.record_usage("TA", "calls", Decimal("-1"), "key-2")
+
+
+def test_scenario_oracle_observes_runtime_behavior_not_only_seeded_flags() -> None:
+    target = ReferenceTarget()
+    target.read_resource = lambda _actor, _resource: ("TB", "B")  # type: ignore[method-assign]
+    passed, observed = target.evaluate("TEN-001", example_config())
+    assert not passed
+    assert observed == "cross-tenant resource was visible"

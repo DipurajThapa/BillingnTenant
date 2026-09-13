@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from preflight.models import (
     AuthContext,
@@ -11,6 +12,9 @@ from preflight.models import (
     EventReceipt,
     UsageProjection,
 )
+
+if TYPE_CHECKING:
+    from preflight.config import CoreConfig
 
 
 @dataclass
@@ -149,6 +153,12 @@ class ReferenceTarget:
                 stateChanged=False,
                 errorCode="invalid_signature",
             )
+        if event.event_type == "irrelevant":
+            return EventReceipt(
+                eventId=event.event_id,
+                outcome="ignored",
+                stateChanged=False,
+            )
         if event.event_id in self.events:
             prior = self.events[event.event_id]
             return EventReceipt(
@@ -204,12 +214,12 @@ class ReferenceTarget:
             periodEnd=self.clock + timedelta(days=30),
         )
 
-    def evaluate(self, test_id: str) -> tuple[bool, str]:
+    def evaluate(self, test_id: str, config: "CoreConfig") -> tuple[bool, str]:
         if test_id in self.errors:
             raise RuntimeError(f"seeded runtime error {test_id}")
-        if test_id in self.defects:
-            return False, f"seeded defect {test_id} observed"
-        return True, "reference oracle satisfied"
+        from preflight.scenario_oracles import evaluate_reference_scenario
+
+        return evaluate_reference_scenario(self, config, test_id, test_id in self.defects)
 
     def cleanup(self) -> None:
         if self.cleanup_error:

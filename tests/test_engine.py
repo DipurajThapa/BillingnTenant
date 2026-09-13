@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from preflight.catalog import CATALOG
-from preflight.config import example_config
+from preflight.config import CoreConfig, example_config
 from preflight.engine import execute, write_artifacts
 from preflight.reference import ReferenceTarget
 
@@ -27,11 +27,29 @@ def test_reference_core_passes_with_explicit_provenance() -> None:
     assert all(x.kind == "reference" for x in result.components)
 
 
-def test_each_core_defect_is_detected_by_its_scenario() -> None:
+def all_features_config() -> CoreConfig:
+    payload = example_config().model_dump(mode="json", by_alias=True)
+    payload["features"]["seatBilling"] = True
+    payload["features"]["meteredUsage"] = True
+    payload["seatPolicy"] = {"minimumQuantity": 1, "pendingInvitationsCount": False}
+    payload["usagePolicy"] = {
+        "meter": "api_calls",
+        "quotasByPlan": {plan: "100" for plan in payload["plans"]},
+        "quotaBoundary": "deny_above",
+        "planChangeTreatment": "preserve_period_usage",
+    }
+    payload["suites"]["enabled"] = ["reference_core", "usage_reference"]
+    return CoreConfig.model_validate(payload)
+
+
+def test_each_reference_defect_is_detected_only_by_its_scenario() -> None:
+    config = all_features_config()
+    correct = execute(config)
+    assert len(correct.results) == 42
+    assert correct.summary.skipped == 0
+    assert correct.gate_status == "PASS"
     for scenario in CATALOG:
-        if scenario.suite == "usage_reference" or scenario.feature_guard == "seat_billing":
-            continue
-        result = execute(example_config(), ReferenceTarget(defects={scenario.id}))
+        result = execute(config, ReferenceTarget(defects={scenario.id}))
         failed = [x.test_id for x in result.results if x.status == "failed"]
         assert failed == [scenario.id]
         assert result.gate_status == ("WARN" if scenario.severity == "medium" else "FAIL")
@@ -52,6 +70,24 @@ def test_feature_gates_and_medium_promotion_follow_configuration() -> None:
     promoted_config.policy.fail_medium = True
     promoted = execute(promoted_config, ReferenceTarget(defects={"RBAC-004"}))
     assert promoted.assertion_gate_status == "FAIL"
+
+
+def test_alternative_billing_policies_keep_reference_oracles_valid() -> None:
+    payload = all_features_config().model_dump(mode="json", by_alias=True)
+    payload["billingPolicy"].update(
+        {
+            "trialEndBehavior": "free",
+            "pastDueBehavior": "immediate_suspend",
+            "gracePeriodSeconds": 0,
+            "upgradeEffective": "period_end",
+            "downgradeEffective": "immediate",
+            "cancelBehavior": "immediate",
+            "reactivationBehavior": "require_new_subscription",
+        }
+    )
+    result = execute(CoreConfig.model_validate(payload), suites=["billing_reference"])
+    assert result.gate_status == "PASS"
+    assert result.summary.passed == 12
 
 
 def test_artifacts_are_valid_offline_and_reference_only(tmp_path: Path, monkeypatch) -> None:
