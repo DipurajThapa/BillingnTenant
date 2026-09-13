@@ -1,6 +1,6 @@
 # INC-004: Report and evidence hardening
 
-**Status:** Implementation complete; native-browser matrix blocked by execution environment
+**Status:** Complete
 
 ## Requirement coverage
 
@@ -15,10 +15,10 @@ EVD-001–004, RPT-001–009, OPS-001–005, UI-001–004 and AC-011–012.
 - Reports remain standalone, escaped, reference-scoped, semantically structured and responsive
   by construction at the specified CSS breakpoints.
 
-## Remaining validation dependency
+## Browser validation evidence
 
-The generated report passed structural, offline, escaping, keyboard-markup and responsive-CSS
-tests. A native Chromium/Firefox viewport matrix could not be executed because this workspace
-has no browser runtime and the connected cloud browser blocks local/data URLs. This is the only
-remaining C6 validation item; it is not represented as passed.
-
+GitHub Actions run `34776323065` executed native Chromium at 320, 375, 768 and 1440 CSS
+pixels. Every viewport passed page-overflow, required-section visibility, reference-banner,
+results-table, keyboard skip-navigation, console-error and external-request checks. Artifact
+`preflight-browser-matrix-34776323065` retains JSON results and one full-page screenshot per
+viewport through the workflow retention period.

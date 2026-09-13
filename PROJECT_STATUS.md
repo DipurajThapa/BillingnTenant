@@ -1,7 +1,7 @@
 # Project Status
 
 **Baseline:** Version 1.5 Core Development Baseline  
-**Overall state:** Core implementation complete; one native-browser validation gate remains
+**Overall state:** Version 1.5 Core Development Baseline complete
 **Verification claim:** Core/reference verification and the named Supabase test integration are verified. No Stripe, customer target, production deployment, cPanel environment, or formal accessibility conformance has been verified.
 
 ## Phase gates
@@ -13,17 +13,13 @@
 | C3 | Complete | provisioning, atomic journal registration, interruption, partial failure, reverse cleanup and gates pass |
 | C4 | Complete | stateful tenant/RBAC/entitlement scenarios, applicability and isolated defect variants pass |
 | C5 | Complete | stateful billing/event/usage scenarios, policy variants and isolated defect variants pass |
-| C6 | In progress | evidence, console/JSON/journal, atomic artifacts and responsive offline HTML pass; native-browser viewport matrix is environment-blocked |
-| C7 | In progress | bidirectional specification traceability and package checks pass; closes only after C1–C6 |
-
-The phase table records the prior implementation checkpoint. A post-integration audit found CLI
-contract and authoritative-document packaging drift, so the overall release claim remains under
-revalidation until those deviations and any further specification mismatches are closed.
+| C6 | Complete | evidence, artifacts and offline HTML pass; native Chromium matrix passes at 320/375/768/1440 px with retained evidence |
+| C7 | Complete | AC-001–014, bidirectional traceability, clean-wheel journey and final CI gates pass |
 
 ## Final validation evidence
 
 - CPython: 3.11.16.
-- Automated tests: 90 passed, no skips or expected failures.
+- Automated tests: 92 passed, no skips or expected failures.
 - Ruff formatting/linting: passed.
 - Isolated wheel build: passed.
 - Clean environment wheel installation: passed.
@@ -35,6 +31,9 @@ revalidation until those deviations and any further specification mismatches are
 - Failure paths: invalid configuration/report, runtime error, fail-fast missing coverage, and cleanup failure validated.
 - Provenance: reference-only banner and all six deferred scopes explicitly unverified.
 - External provider/network dependencies: absent from core imports.
+- Native Chromium report matrix: 320, 375, 768 and 1440 px passed in GitHub Actions run
+  `34776323065`; JSON measurements and screenshots retained in artifact
+  `preflight-browser-matrix-34776323065`.
 
 ## Deferred, non-blocking work
 
