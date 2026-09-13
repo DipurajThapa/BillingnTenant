@@ -36,6 +36,8 @@ Stripe, Supabase, remote HTTP safety/hardening, formal accessibility conformance
 
 GitHub Actions has been activated through decision `GHA-001`. Its passing workflow verifies only repository build evidence and cannot change reference or external verification provenance.
 
+Activation evidence: workflow run `34750679159` completed successfully on Python 3.11, including lint, 28 tests, wheel build, clean-wheel installation, CLI smoke, and artifact publication.
+
 ## Release boundary
 
 This status accepts the Version 1.5 Core Development Baseline. It does not claim an Integrated Foundational MVP, production deployment, provider verification, penetration test, compliance certification, or formal accessibility conformance.
