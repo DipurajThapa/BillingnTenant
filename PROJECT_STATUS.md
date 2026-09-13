@@ -1,38 +1,39 @@
 # Project Status
 
 **Baseline:** Version 1.5 Core Development Baseline  
-**Overall state:** In development  
-**Current phase:** C1 — package, core models, configuration and diagnostics  
-**Verification claim:** None; development tests are not a release or external-verification claim
+**Overall state:** Core baseline complete and validated  
+**Verification claim:** Reference verification only; no external system has been verified
 
-## Phase control
+## Phase gates
 
-| Phase | State | Exit evidence |
+| Phase | State | Evidence |
 | --- | --- | --- |
-| C1 | In progress | DAT-001–012, CFG-001–014, DIA-001–004, PKG-001 |
-| C2 | Not started | PORT-*, ARCH-*, SEC-001–008, SCOPE-001/002 |
-| C3 | Not started | RUN-*, GATE-*, COV-*, ERR/CLN recovery tests |
-| C4 | Not started | TEN/RBAC/ENT scenarios and defects |
-| C5 | Not started | BILL/WEB/optional USG scenarios and defects |
-| C6 | Not started | Evidence, console, JSON and HTML verification |
-| C7 | Not started | AC-001–014 and bidirectional traceability |
+| C1 | Complete | strict models/config/diagnostics; Python 3.11 clean-wheel smoke |
+| C2 | Complete | provider-neutral ports, immutable catalog, local reference implementation, no external imports |
+| C3 | Complete | lifecycle, deterministic gates, typed runtime failure, fail-fast coverage, cleanup outcome |
+| C4 | Complete | tenant/RBAC/entitlement catalog and correct/defective reference validation |
+| C5 | Complete | billing/event/usage catalog and correct/defective reference validation |
+| C6 | Complete | console, canonical JSON, journal, sanitized responsive offline HTML and regeneration |
+| C7 | Complete | executable traceability, scope isolation, acceptance and clean-package validation |
 
-## Current increment
+## Final validation evidence
 
-Implemented the installable package skeleton, strict base/domain contracts, authentication-mode rules, initial core configuration and suite resolver, centralized diagnostics, CLI version entry point, pinned verification constraints and focused tests.
+- CPython: 3.11.16.
+- Automated tests: 28 passed, no skips or expected failures.
+- Ruff formatting/linting: passed.
+- Isolated wheel build: passed.
+- Clean environment wheel installation: passed.
+- Installed CLI version and help smoke: passed.
+- Reference core: 36 applicable scenarios; usage adds 6 when enabled.
+- Defect corpus: each selected reference defect is caught by its matching scenario.
+- Failure paths: invalid configuration/report, runtime error, fail-fast missing coverage, and cleanup failure validated.
+- Provenance: reference-only banner and all six deferred scopes explicitly unverified.
+- External provider/network dependencies: absent from core imports.
 
-Remaining before C1 acceptance: complete every canonical model and cross-model invariant; implement the full billing/usage/seat configuration schema and exact diagnostic-path mapping; create executable traceability; run clean-wheel verification and the complete C1 test inventory.
+## Deferred, non-blocking work
 
-## Latest verification evidence
+Stripe, Supabase, remote HTTP safety/hardening, GitHub Actions, formal accessibility conformance, and cPanel-specific deployment remain governed by `docs/spec/03_DEFERRED_INTEGRATIONS_BACKLOG.md`.
 
-- Unit/contract tests: 14 passed.
-- Ruff format/lint: passed.
-- Wheel build: passed in an isolated build environment.
-- Installed CLI smoke: `preflight version` returned `0.1.0`.
-- Environment limitation: the available runner is Python 3.12.14. Python 3.11 clean-environment acceptance remains pending and C1 is therefore not yet accepted.
+## Release boundary
 
-## Decisions and assumptions
-
-- Resolved: PyYAML is the minimal parser required by the approved `.preflight/core.yml` contract.
-- No product-owner decision currently blocks C1.
-- Stripe, Supabase, remote HTTP, GitHub Actions, formal accessibility and cPanel remain deferred.
+This status accepts the Version 1.5 Core Development Baseline. It does not claim an Integrated Foundational MVP, production deployment, provider verification, penetration test, compliance certification, or formal accessibility conformance.
