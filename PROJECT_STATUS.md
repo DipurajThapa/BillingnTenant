@@ -32,13 +32,15 @@
 
 ## Deferred, non-blocking work
 
-Stripe, Supabase, formal accessibility conformance, and cPanel-specific deployment remain governed by `docs/spec/03_DEFERRED_INTEGRATIONS_BACKLOG.md`.
+Stripe, Supabase, and cPanel-specific deployment remain governed by `docs/spec/03_DEFERRED_INTEGRATIONS_BACKLOG.md`.
 
 GitHub Actions has been activated through decision `GHA-001`. Its passing workflow verifies only repository build evidence and cannot change reference or external verification provenance.
 
 Activation evidence: workflow run `34750679159` completed successfully on Python 3.11, including lint, 28 tests, wheel build, clean-wheel installation, CLI smoke, and artifact publication.
 
 Remote HTTP safety has been implemented through decision `HTTP-001` as an optional external transport. Its 7 additional security tests bring the suite to 35 passing tests. Real-target verification remains pending until an approved hostname, operation map, authorization and credentials are supplied.
+
+Accessibility implementation has been activated through `A11Y-001` with WCAG 2.2 AA as the target. Four structural acceptance tests bring the suite to 39 passing tests. A formal conformance claim remains pending manual browser, keyboard, zoom, forced-color and screen-reader validation of the final artifact.
 
 ## Release boundary
 
