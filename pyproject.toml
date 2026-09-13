@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling>=1.25,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "saas-preflight"
+version = "0.1.0"
+requires-python = ">=3.11,<3.12"
+dependencies = ["typer>=0.12,<1", "pydantic>=2.8,<3", "PyYAML>=6,<7", "Jinja2>=3.1,<4"]
+
+[project.optional-dependencies]
+dev = ["build>=1.2,<2", "pytest>=8.3,<9", "ruff>=0.6,<1"]
+
+[project.scripts]
+preflight = "preflight.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/preflight"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
