@@ -13,6 +13,7 @@ def minimal_config() -> dict[str, object]:
         "rolePermissions": {"owner": ["export"]},
         "plans": {"free": {"entitlements": ["dashboard"]}},
         "capabilities": {"export": {"requiredPermission": "export", "requiredEntitlement": None}},
+        "billingPolicy": {"trialPlan": "free", "trialDays": 14},
     }
 
 
