@@ -141,7 +141,13 @@ def write_artifacts(result: RunResult, root: Path) -> Path:
     (run_dir / "preflight-report.html").write_text(report, encoding="utf-8")
     (run_dir / "journal.jsonl").write_text(
         json.dumps(
-            {"schemaVersion": "1.0", "runId": result.run_id, "sequence": 1, "event": "run_created"}
+            {
+                "schemaVersion": "1.0",
+                "runId": result.run_id,
+                "sequence": 1,
+                "event": "run_created",
+                "adapterKind": "reference",
+            }
         )
         + "\n",
         encoding="utf-8",

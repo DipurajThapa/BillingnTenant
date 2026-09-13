@@ -1,8 +1,8 @@
 # Project Status
 
 **Baseline:** Version 1.5 Core Development Baseline  
-**Overall state:** Core baseline complete and validated  
-**Verification claim:** Reference verification only; no external system has been verified
+**Overall state:** Core baseline revalidation and specification-alignment remediation in progress
+**Verification claim:** Core/reference verification and the named Supabase test integration are verified. No Stripe, customer target, production deployment, cPanel environment, or formal accessibility conformance has been verified.
 
 ## Phase gates
 
@@ -16,10 +16,14 @@
 | C6 | Complete | console, canonical JSON, journal, sanitized responsive offline HTML and regeneration |
 | C7 | Complete | executable traceability, scope isolation, acceptance and clean-package validation |
 
+The phase table records the prior implementation checkpoint. A post-integration audit found CLI
+contract and authoritative-document packaging drift, so the overall release claim remains under
+revalidation until those deviations and any further specification mismatches are closed.
+
 ## Final validation evidence
 
 - CPython: 3.11.16.
-- Automated tests: 28 passed, no skips or expected failures.
+- Automated tests: 50 passed, no skips or expected failures.
 - Ruff formatting/linting: passed.
 - Isolated wheel build: passed.
 - Clean environment wheel installation: passed.
@@ -32,23 +36,23 @@
 
 ## Deferred, non-blocking work
 
-Stripe, Supabase, and cPanel-specific deployment remain governed by `docs/spec/03_DEFERRED_INTEGRATIONS_BACKLOG.md`.
+Stripe and cPanel-specific deployment remain governed by the Version 1.5 deferred-integration backlog. Supabase has moved from deferred design into a verified test integration.
 
-Supabase activation is in progress through `SUP-001`. The provider-neutral adapter, reproducible
-shared-schema and RPC migrations, strict RLS/grants, and contract tests are implemented. Both
-migrations are applied to dedicated test project `rsrztmgozovtjmbstlje`; live rollback-only database
-tests validate own-tenant visibility, cross-tenant denial, revoked membership denial and anonymous
-denial. Real Auth identities and authenticated Data API adapter probes remain required, so no
-Supabase provider verification claim is permitted yet.
+Supabase activation is complete through `SUP-001` for dedicated test project alias
+`rsrztmgozovtjmbstlje`. The provider-neutral adapter, reproducible shared-schema and RPC migrations,
+strict RLS/grants, contract tests, real Auth identities, and authenticated Data API allow/deny/create/
+cleanup probes are implemented. GitHub Actions run `34759024714`, attempt 4, completed successfully
+on 2026-09-13. This evidence verifies only the named Supabase test integration; it does not verify a
+production project, customer environment, general Supabase availability, or unrelated providers.
 
 GitHub Actions has been activated through decision `GHA-001`. Its passing workflow verifies only repository build evidence and cannot change reference or external verification provenance.
 
 Activation evidence: workflow run `34750679159` completed successfully on Python 3.11, including lint, 28 tests, wheel build, clean-wheel installation, CLI smoke, and artifact publication.
 
-Remote HTTP safety has been implemented through decision `HTTP-001` as an optional external transport. Its 7 additional security tests bring the suite to 35 passing tests. Real-target verification remains pending until an approved hostname, operation map, authorization and credentials are supplied.
+Remote HTTP safety has been implemented through decision `HTTP-001` as an optional external transport. Its security controls are covered by the current 50-test repository suite. Supabase exercises this transport against its named test project; other real targets remain unverified until their hostname, operation map, authorization and credentials are approved.
 
-Accessibility implementation has been activated through `A11Y-001` with WCAG 2.2 AA as the target. Four structural acceptance tests bring the suite to 39 passing tests. A formal conformance claim remains pending manual browser, keyboard, zoom, forced-color and screen-reader validation of the final artifact.
+Accessibility implementation has been activated through `A11Y-001` with WCAG 2.2 AA as the target. Structural acceptance is included in the current 50-test repository suite. A formal conformance claim remains pending manual browser, keyboard, zoom, forced-color and screen-reader validation of the final artifact.
 
 ## Release boundary
 
-This status accepts the Version 1.5 Core Development Baseline. It does not claim an Integrated Foundational MVP, production deployment, provider verification, penetration test, compliance certification, or formal accessibility conformance.
+This status accepts the Version 1.5 Core Development Baseline and the named Supabase test integration. It does not claim an Integrated Foundational MVP, production deployment, Stripe/customer-system verification, penetration test, compliance certification, or formal accessibility conformance.
