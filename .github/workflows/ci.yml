@@ -57,7 +57,7 @@ jobs:
           retention-days: 14
 
   browser-report:
-    name: Chromium report matrix
+    name: Cross-browser report matrix
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 15

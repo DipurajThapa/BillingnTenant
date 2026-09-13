@@ -5,7 +5,7 @@
 **Status:** Core Development Baseline approved for implementation  
 **Runtime:** CPython 3.11  
 **Current verification level:** reference only  
-**External integrations:** deferred and not claimed as verified
+**External integrations:** separately activated and claimed only at their recorded evidence level
 
 ## 1. Document map
 
@@ -60,7 +60,10 @@ The currently authorized build is a fully working provider-neutral engine valida
 
 ### PRD-004 Integrated Foundational MVP
 
-This later release connects the proven core to selected external systems. Stripe, Supabase and safe remote HTTP execution are explicitly deferred. External assurance claims are prohibited until their backlog activation gates and acceptance criteria pass.
+This later release connects the proven core to selected external systems. Supabase test integration,
+remote HTTP safety and GitHub Actions have separate activation records; none changes core behavior or
+provenance. Stripe and cPanel remain deferred. External assurance claims are prohibited unless the
+named integration's activation gate and acceptance criteria pass.
 
 GitHub Actions, formal accessibility conformance and cPanel deployment remain independent deferred capabilities and are not required for the Integrated Foundational MVP unless later approved.
 
@@ -405,4 +408,3 @@ Deviation rule: before implementation, record affected IDs, proposed behavior, r
 - Core reports may claim only reference verification.
 - Missing behavior becomes an error/incomplete result, not an inferred expectation.
 - Completion requires observable acceptance, not code presence or test-count targets.
-

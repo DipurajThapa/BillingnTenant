@@ -139,7 +139,17 @@ An Integrated Foundational MVP may be declared only when every integration named
 
 When activated, each item must receive requirement, test and acceptance IDs within that integration's implementation plan. Until activation, this backlog item and its preserved-boundary clauses are the sole source of truth; speculative detailed tests must not be added to the core suite.
 
-## 5. Deferred status
+## 5. Integration status
 
-All six items are **non-blocking deferred work** for Version 1.5 Core Development Baseline. No unresolved decision in this document prevents core implementation or core acceptance. Each becomes a release blocker only after it is explicitly activated for a named later release.
+| Item | State | Current claim boundary |
+| --- | --- | --- |
+| BL-HTTP | Activated; safety implementation verified | Controlled transport tests and the named Supabase test target only; no general remote-target claim |
+| BL-SUPABASE | Activated; named test integration verified | Project alias `rsrztmgozovtjmbstlje`; not production or another customer/project |
+| BL-STRIPE | Deferred | No Stripe environment or billing flow verified |
+| BL-GITHUB | Activated | Repository build and evidence automation only |
+| BL-A11Y | Activated; implementation and cross-browser automation complete | WCAG 2.2 AA formal conformance remains pending human screen-reader/manual protocol |
+| BL-CPANEL | Deferred | No hosting environment verified |
 
+All items remain non-blocking for the Version 1.5 Core Development Baseline. An activated item
+changes only its own evidence-backed claim and never changes a reference result into provider
+verification.

@@ -34,6 +34,9 @@
 - Native Chromium report matrix: 320, 375, 768 and 1440 px passed in GitHub Actions run
   `34776323065`; JSON measurements and screenshots retained in artifact
   `preflight-browser-matrix-34776323065`.
+- Cross-browser hardening: Chromium and Firefox normal matrices plus forced-colors/text-spacing
+  modes passed in GitHub Actions run `34777798680`; ten evidence records/screenshots retained in
+  artifact `preflight-browser-matrix-34777798680`.
 
 ## Deferred, non-blocking work
 
@@ -52,7 +55,9 @@ Activation evidence: workflow run `34750679159` completed successfully on Python
 
 Remote HTTP safety has been implemented through decision `HTTP-001` as an optional external transport. Its security controls are covered by the current 50-test repository suite. Supabase exercises this transport against its named test project; other real targets remain unverified until their hostname, operation map, authorization and credentials are approved.
 
-Accessibility implementation has been activated through `A11Y-001` with WCAG 2.2 AA as the target. Structural acceptance is included in the current 50-test repository suite. A formal conformance claim remains pending manual browser, keyboard, zoom, forced-color and screen-reader validation of the final artifact.
+Accessibility implementation has been activated through `A11Y-001` with WCAG 2.2 AA as the target.
+Structural and automated Chromium/Firefox acceptance pass. A formal conformance claim remains
+pending the recorded human screen-reader/manual protocol.
 
 ## Release boundary
 
