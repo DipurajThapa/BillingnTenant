@@ -1,0 +1,29 @@
+schemaVersion: "1.0"
+entries:
+  - requirementId: DATA-001-005
+    testIds: [DAT-001-012]
+    acceptanceIds: [AC-002, AC-003]
+  - requirementId: CFG-001-003
+    testIds: [CFG-001-014]
+    acceptanceIds: [AC-004, AC-005]
+  - requirementId: ARC-001-006
+    testIds: [ARCH-001-006, PORT-001-012]
+    acceptanceIds: [AC-001, AC-002]
+  - requirementId: WF-001-006
+    testIds: [CLI-001-009, RUN-001-005]
+    acceptanceIds: [AC-004, AC-005, AC-006]
+  - requirementId: SCN-TEN-RBAC-BILL-WEB-ENT-USG
+    testIds: [TEN-001-USG-006, DEF-TEN-001-DEF-USG-006]
+    acceptanceIds: [AC-008, AC-009]
+  - requirementId: UI-001-004
+    testIds: [RPT-001-009]
+    acceptanceIds: [AC-011, AC-012]
+  - requirementId: SEC-CORE-001-005
+    testIds: [SEC-001-008]
+    acceptanceIds: [AC-002, AC-003, AC-010]
+  - requirementId: PRD-004-005
+    testIds: [SCOPE-001-003]
+    acceptanceIds: [AC-013]
+  - requirementId: TST-006
+    testIds: [TRACE-001]
+    acceptanceIds: [AC-014]
