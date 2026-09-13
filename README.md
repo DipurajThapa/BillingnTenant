@@ -2,4 +2,12 @@
 
 Python implementation of the Version 1.5 Core Development Baseline.
 
-The Version 1.5 Core Development Baseline is under specification-alignment revalidation. The reference profile never contacts external providers or claims external verification. A separate, explicitly named Supabase test integration is verified. See `PROJECT_STATUS.md` for executed evidence, `docs/spec/` for authoritative requirements, and `docs/decisions/` for activated integration boundaries.
+The Version 1.5 Core Development Baseline is complete. The reference profile never contacts
+external providers or claims external verification. A separate, explicitly named Supabase test
+integration is verified. Stripe and cPanel deployment remain deferred. Automated accessibility
+acceptance passes; formal WCAG 2.2 AA conformance remains pending the documented human
+NVDA/Chrome and Narrator/Edge protocol.
+
+See `PROJECT_STATUS.md` for executed evidence, `docs/spec/` for authoritative requirements,
+`docs/decisions/` for activated integration boundaries, and
+`docs/validation/A11Y_WCAG_2_2_AA_MANUAL_PROTOCOL.md` for the formal accessibility release gate.
