@@ -27,3 +27,6 @@ entries:
   - requirementId: TST-006
     testIds: [TRACE-001]
     acceptanceIds: [AC-014]
+  - requirementId: SUP-001-005
+    testIds: [SUP-CONTRACT-001-005, SUP-LIVE-001-007]
+    acceptanceIds: [SUP-AC-001, SUP-AC-002, SUP-AC-003]

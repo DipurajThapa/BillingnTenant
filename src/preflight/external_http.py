@@ -65,11 +65,13 @@ class RemoteHttpTransport:
         self,
         config: RemoteHttpConfig,
         credential_provider: Callable[[str], str | None],
+        static_header_provider: Callable[[], dict[str, str]] | None = None,
         resolver: Callable[[str, int], set[str]] = default_resolver,
         transport: httpx.BaseTransport | None = None,
     ) -> None:
         self.config = config
         self.credential_provider = credential_provider
+        self.static_header_provider = static_header_provider or (lambda: {})
         self.resolver = resolver
         self.transport = transport
         self._validate_destination(str(config.base_url))
@@ -101,6 +103,10 @@ class RemoteHttpTransport:
         if method not in self.config.methods:
             raise HttpSafetyError("HTTP_METHOD_BLOCKED")
         headers = {"Accept": "application/json", "User-Agent": "saas-preflight/1"}
+        for name, value in self.static_header_provider().items():
+            if name.lower() not in {"apikey"} or not value or "\n" in value or "\r" in value:
+                raise HttpSafetyError("HTTP_HEADER_BLOCKED")
+            headers[name] = value
         if auth.credential_handle:
             credential = self.credential_provider(auth.credential_handle)
             if not credential:

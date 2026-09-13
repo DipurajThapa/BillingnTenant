@@ -110,3 +110,23 @@ def test_environment_proxy_is_disabled_and_credentials_fail_closed() -> None:
             AuthContext(mode="signed_event", credentialHandle="missing"),
             ProbeRequest(operation="create_item"),
         )
+
+
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {"x-unapproved": "value"},
+        {"apikey": ""},
+        {"apikey": "value\r\ninjected: true"},
+    ],
+)
+def test_static_headers_are_narrow_and_injection_safe(headers: dict[str, str]) -> None:
+    client = RemoteHttpTransport(
+        config(),
+        lambda _: None,
+        static_header_provider=lambda: headers,
+        resolver=lambda _h, _p: {"93.184.216.34"},
+        transport=httpx.MockTransport(lambda request: pytest.fail("network called")),
+    )
+    with pytest.raises(HttpSafetyError, match="HTTP_HEADER_BLOCKED"):
+        client.execute(AuthContext(mode="public"), ProbeRequest(operation="get_item"))

@@ -34,6 +34,13 @@
 
 Stripe, Supabase, and cPanel-specific deployment remain governed by `docs/spec/03_DEFERRED_INTEGRATIONS_BACKLOG.md`.
 
+Supabase activation is in progress through `SUP-001`. The provider-neutral adapter, reproducible
+shared-schema and RPC migrations, strict RLS/grants, and contract tests are implemented. Both
+migrations are applied to dedicated test project `rsrztmgozovtjmbstlje`; live rollback-only database
+tests validate own-tenant visibility, cross-tenant denial, revoked membership denial and anonymous
+denial. Real Auth identities and authenticated Data API adapter probes remain required, so no
+Supabase provider verification claim is permitted yet.
+
 GitHub Actions has been activated through decision `GHA-001`. Its passing workflow verifies only repository build evidence and cannot change reference or external verification provenance.
 
 Activation evidence: workflow run `34750679159` completed successfully on Python 3.11, including lint, 28 tests, wheel build, clean-wheel installation, CLI smoke, and artifact publication.
