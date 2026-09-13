@@ -21,7 +21,7 @@ def test_report_is_offline_responsive_and_escapes_rendered_text() -> None:
     html = render_html(result)
     assert "<script>" not in html
     assert "&lt;script&gt;" in html
-    assert "max-width:600px" in html
+    assert "max-width:37.5rem" in html
     assert "width=device-width" in html
     assert "http://" not in html and "https://" not in html
 
