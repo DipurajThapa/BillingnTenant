@@ -69,3 +69,9 @@ typing-extensions==4.16.0
     #   typing-inspection
 typing-inspection==0.4.4
     # via pydantic
+playwright==1.55.0
+    # via saas-preflight (pyproject.toml browser extra)
+pyee==13.0.0
+    # via playwright
+greenlet==3.2.4
+    # via playwright

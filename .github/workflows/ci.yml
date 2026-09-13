@@ -56,3 +56,35 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  browser-report:
+    name: Chromium report matrix
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Install Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install browser verification dependencies
+        run: python -m pip install --constraint constraints.txt --editable '.[browser]'
+
+      - name: Install isolated Chromium runtime
+        run: python -m playwright install --with-deps chromium
+
+      - name: Verify report at required widths
+        run: python scripts/verify_report_browser.py
+
+      - name: Publish browser evidence
+        if: always()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
+        with:
+          name: preflight-browser-matrix-${{ github.run_id }}
+          path: browser-artifacts/
+          if-no-files-found: error
+          retention-days: 14
