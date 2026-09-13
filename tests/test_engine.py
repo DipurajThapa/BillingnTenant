@@ -2,6 +2,8 @@ import json
 import os
 from pathlib import Path
 
+import pytest
+
 from preflight.catalog import CATALOG
 from preflight.config import example_config
 from preflight.engine import execute, write_artifacts
@@ -52,9 +54,10 @@ def test_feature_gates_and_medium_promotion_follow_configuration() -> None:
     assert promoted.assertion_gate_status == "FAIL"
 
 
-def test_artifacts_are_valid_offline_and_reference_only(tmp_path: Path) -> None:
+def test_artifacts_are_valid_offline_and_reference_only(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
     result = execute(example_config())
-    location = write_artifacts(result, tmp_path)
+    location = write_artifacts(result, Path("artifacts"))
     data = json.loads((location / "run.json").read_text())
     html = (location / "preflight-report.html").read_text()
     assert data["runId"] == result.run_id
@@ -74,6 +77,17 @@ def test_runtime_and_cleanup_failures_are_incomplete() -> None:
     cleanup = execute(example_config(), ReferenceTarget(cleanup_error=True))
     assert cleanup.gate_status == "INCOMPLETE"
     assert cleanup.cleanup_status == "failed"
+
+
+def test_artifact_writer_rejects_symlink_escape(tmp_path: Path, monkeypatch) -> None:
+    workspace = tmp_path / "workspace"
+    outside = tmp_path / "outside"
+    workspace.mkdir()
+    outside.mkdir()
+    (workspace / "escape").symlink_to(outside, target_is_directory=True)
+    monkeypatch.chdir(workspace)
+    with pytest.raises(ValueError, match="escapes workspace"):
+        write_artifacts(execute(example_config()), Path("escape"))
 
 
 def test_fail_fast_preserves_missing_coverage() -> None:

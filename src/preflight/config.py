@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import Field, ValidationError, model_validator
+from pydantic import Field, ValidationError, field_validator, model_validator
 
 from preflight.models import StrictModel
 
@@ -101,6 +101,20 @@ class CoreConfig(StrictModel):
     suites: Suites = Field(default_factory=Suites)
     execution: Execution = Field(default_factory=Execution)
     policy: Policy = Field(default_factory=Policy)
+
+    @field_validator("artifact_directory")
+    @classmethod
+    def artifact_directory_is_workspace_relative(cls, value: str) -> str:
+        path = Path(value)
+        if (
+            not value
+            or len(value) > 240
+            or path.is_absolute()
+            or ".." in path.parts
+            or path == Path(".")
+        ):
+            raise ValueError("artifactDirectory must be a safe workspace-relative path")
+        return value
 
     @model_validator(mode="after")
     def cross_references(self) -> "CoreConfig":

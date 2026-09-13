@@ -11,8 +11,8 @@
 | C1 | In progress | strict models/config/diagnostics and clean-wheel smoke pass; exact diagnostic-path coverage remains |
 | C2 | In progress | provider-neutral signatures/catalog/no-external-import checks pass; full reference port implementations remain |
 | C3 | In progress | gates, fail-fast coverage and cleanup validation pass; complete fixture lifecycle/interruption behavior remains |
-| C4 | In progress | catalog, applicability and defect detection pass; stateful tenant/RBAC/entitlement port execution remains |
-| C5 | In progress | catalog, severity and defect detection pass; stateful billing/event/usage port execution remains |
+| C4 | In progress | catalog, applicability, defect detection and direct stateful tenant/RBAC behavior pass; scenario-to-port orchestration remains |
+| C5 | In progress | catalog, severity, defect detection and direct stateful billing/event/usage behavior pass; scenario-to-port orchestration remains |
 | C6 | In progress | console/JSON/journal/responsive offline HTML pass structural tests; final manual browser matrix remains |
 | C7 | In progress | bidirectional specification traceability and package checks pass; closes only after C1–C6 |
 
@@ -23,11 +23,12 @@ revalidation until those deviations and any further specification mismatches are
 ## Final validation evidence
 
 - CPython: 3.11.16.
-- Automated tests: 59 passed, no skips or expected failures.
+- Automated tests: 69 passed, no skips or expected failures.
 - Ruff formatting/linting: passed.
 - Isolated wheel build: passed.
 - Clean environment wheel installation: passed.
 - Installed CLI version and help smoke: passed.
+- Clean-wheel functional journey: init, doctor, filtered catalog, tenant suite, report regeneration and cleanup passed.
 - Reference core: 36 applicable scenarios; usage adds 6 when enabled.
 - Defect corpus: each selected reference defect is caught by its matching scenario.
 - Failure paths: invalid configuration/report, runtime error, fail-fast missing coverage, and cleanup failure validated.

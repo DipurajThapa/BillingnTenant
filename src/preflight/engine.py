@@ -156,7 +156,11 @@ def write_artifacts(result: RunResult, root: Path) -> Path:
     if len(serialized.encode("utf-8")) > 10 * 1024 * 1024:
         raise ValueError("RPT_RENDER_FAILED: JSON artifact exceeds 10 MiB")
     report = render_html(result)
-    run_dir = root / result.run_id
+    workspace = Path.cwd().resolve()
+    resolved_root = root.resolve()
+    if not resolved_root.is_relative_to(workspace):
+        raise ValueError("RPT_RENDER_FAILED: artifact directory escapes workspace")
+    run_dir = resolved_root / result.run_id
     run_dir.mkdir(parents=True, exist_ok=False, mode=0o700)
     run_json = run_dir / "run.json"
     html_report = run_dir / "preflight-report.html"
@@ -179,7 +183,10 @@ def write_artifacts(result: RunResult, root: Path) -> Path:
     if os.name == "posix":
         for path in (run_json, html_report, journal):
             path.chmod(0o600)
-    return run_dir
+    try:
+        return run_dir.relative_to(workspace)
+    except ValueError:
+        return run_dir
 
 
 def render_html(result: RunResult) -> str:

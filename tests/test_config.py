@@ -83,3 +83,9 @@ def test_metering_requires_complete_valid_quotas_and_explicit_suite() -> None:
     payload["usagePolicy"]["quotasByPlan"] = {"free": "NaN"}
     with pytest.raises(ValidationError, match="finite non-negative"):
         CoreConfig.model_validate(payload)
+
+
+@pytest.mark.parametrize("path", ["/tmp/results", "../results", ".", ""])
+def test_artifact_directory_must_remain_inside_workspace(path: str) -> None:
+    with pytest.raises(ValidationError, match="workspace-relative"):
+        CoreConfig.model_validate({**minimal_config(), "artifactDirectory": path})
