@@ -1,6 +1,6 @@
 # INC-008: Formal accessibility validation gate
 
-**Status:** Implementation complete; human execution pending
+**Status:** Complete
 
 ## Objective
 
@@ -25,9 +25,10 @@ claiming that automation substitutes for assistive-technology testing.
 - All 95 automated tests pass with no skips or expected failures.
 - The validator accepts only a complete passing matrix bound to the supplied report.
 
-## Remaining release gate
+## Human release-gate evidence
 
-Formal WCAG 2.2 AA conformance is not yet claimed. A human reviewer must run
-`docs/validation/A11Y_WCAG_2_2_AA_MANUAL_PROTOCOL.md` against the unchanged final report using both
-required Windows 11 assistive-technology environments. Any report HTML or CSS change invalidates
-the evidence and requires both environments to be repeated.
+Dipuraj Thapa completed both required Windows 11 assistive-technology environments on 2026-09-14.
+All twenty manual environment/check results passed and the repository validator accepted the
+SHA-256-bound evidence. This completes `A11Y-AC-001` through `A11Y-AC-004` for the recorded report
+artifact. Any report HTML or CSS change invalidates this evidence and requires both environments to
+be repeated.

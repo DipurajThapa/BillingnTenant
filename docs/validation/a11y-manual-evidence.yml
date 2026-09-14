@@ -1,0 +1,37 @@
+schemaVersion: "1.0"
+reportSha256: "e7d9d21e73db4ba10106cb2d3be123d08803e30f83f96e3465ad536ba4dd29c3"
+testedAt: "2026-09-14T05:12:08Z"
+reviewer: "Dipuraj Thapa"
+environments:
+  - screenReader: NVDA
+    screenReaderVersion: "2026.2"
+    browser: Chrome
+    browserVersion: "152.0.7977.83"
+    operatingSystem: "Windows 11 26200.9445"
+    checks:
+      - {id: A11Y-MAN-001, status: pass, notes: ""}
+      - {id: A11Y-MAN-002, status: pass, notes: ""}
+      - {id: A11Y-MAN-003, status: pass, notes: ""}
+      - {id: A11Y-MAN-004, status: pass, notes: ""}
+      - {id: A11Y-MAN-005, status: pass, notes: ""}
+      - {id: A11Y-MAN-006, status: pass, notes: ""}
+      - {id: A11Y-MAN-007, status: pass, notes: ""}
+      - {id: A11Y-MAN-008, status: pass, notes: ""}
+      - {id: A11Y-MAN-009, status: pass, notes: ""}
+      - {id: A11Y-MAN-010, status: pass, notes: ""}
+  - screenReader: Narrator
+    screenReaderVersion: "Windows Narrator (Windows 11 build 26200.9445)"
+    browser: Edge
+    browserVersion: "153.0.4234.32"
+    operatingSystem: "Windows 11 26200.9445"
+    checks:
+      - {id: A11Y-MAN-001, status: pass, notes: ""}
+      - {id: A11Y-MAN-002, status: pass, notes: ""}
+      - {id: A11Y-MAN-003, status: pass, notes: ""}
+      - {id: A11Y-MAN-004, status: pass, notes: ""}
+      - {id: A11Y-MAN-005, status: pass, notes: ""}
+      - {id: A11Y-MAN-006, status: pass, notes: ""}
+      - {id: A11Y-MAN-007, status: pass, notes: ""}
+      - {id: A11Y-MAN-008, status: pass, notes: ""}
+      - {id: A11Y-MAN-009, status: pass, notes: ""}
+      - {id: A11Y-MAN-010, status: pass, notes: ""}

@@ -103,10 +103,10 @@ are implemented. Formal validation requires Windows 11 with NVDA/current Chrome 
 Narrator/current Edge. Evidence must pass all `A11Y-MAN-001` through `A11Y-MAN-010` checks in both
 environments and must be bound to the unchanged report by SHA-256.
 
-**Remaining human work:** execute the protocol in
-`docs/validation/A11Y_WCAG_2_2_AA_MANUAL_PROTOCOL.md`, remediate any failures, and validate the
-completed evidence file with `scripts/validate_a11y_evidence.py`. A VPAT or third-party certification
-is not required by the current decision and must not be implied.
+**Completed human work:** Dipuraj Thapa executed the protocol in both required environments and the
+SHA-256-bound evidence in `docs/validation/a11y-manual-evidence.yml` passed
+`scripts/validate_a11y_evidence.py`. A VPAT or third-party certification is not required by the
+current decision and must not be implied.
 
 **Failure and recovery contract:** any failed or unexecuted manual check, missing environment,
 invalid evidence, or report digest mismatch blocks only the formal conformance claim. Correct the
@@ -156,7 +156,7 @@ When activated, each item must receive requirement, test and acceptance IDs with
 | BL-SUPABASE | Activated; named test integration verified | Project alias `rsrztmgozovtjmbstlje`; not production or another customer/project |
 | BL-STRIPE | Deferred | No Stripe environment or billing flow verified |
 | BL-GITHUB | Activated | Repository build and evidence automation only |
-| BL-A11Y | Activated; automated implementation and manual evidence gate complete | WCAG 2.2 AA formal conformance remains pending human NVDA/Narrator execution |
+| BL-A11Y | Complete for recorded report artifact | WCAG 2.2 AA validation is hash-bound; no third-party certification or future-report claim |
 | BL-CPANEL | Deferred | No hosting environment verified |
 
 All items remain non-blocking for the Version 1.5 Core Development Baseline. An activated item

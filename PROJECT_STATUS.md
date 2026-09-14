@@ -2,7 +2,7 @@
 
 **Baseline:** Version 1.5 Core Development Baseline  
 **Overall state:** Version 1.5 Core Development Baseline complete
-**Verification claim:** Core/reference verification and the named Supabase test integration are verified. No Stripe, customer target, production deployment, cPanel environment, or formal accessibility conformance has been verified.
+**Verification claim:** Core/reference verification, the named Supabase test integration, and WCAG 2.2 AA validation of the hash-bound standalone report are verified. No Stripe, customer target, production deployment, or cPanel environment has been verified.
 
 ## Phase gates
 
@@ -55,11 +55,15 @@ Activation evidence: workflow run `34750679159` completed successfully on Python
 
 Remote HTTP safety has been implemented through decision `HTTP-001` as an optional external transport. Its security controls are covered by the current 50-test repository suite. Supabase exercises this transport against its named test project; other real targets remain unverified until their hostname, operation map, authorization and credentials are approved.
 
-Accessibility implementation has been activated through `A11Y-001` with WCAG 2.2 AA as the target.
-Structural and automated Chromium/Firefox acceptance pass. The evidence schema, exact-artifact
-digest validator and repeatable human protocol are implemented. A formal conformance claim remains
-pending successful execution with NVDA/Chrome and Narrator/Edge on Windows 11.
+Accessibility validation is complete through `A11Y-001` for the standalone report artifact with
+SHA-256 `e7d9d21e73db4ba10106cb2d3be123d08803e30f83f96e3465ad536ba4dd29c3`. Structural and automated
+Chromium/Firefox acceptance pass, and Dipuraj Thapa completed all manual checks with NVDA/Chrome and
+Narrator/Edge on Windows 11. The claim is artifact-specific and is not third-party certification or
+a VPAT; any report HTML/CSS change requires revalidation.
 
 ## Release boundary
 
-This status accepts the Version 1.5 Core Development Baseline and the named Supabase test integration. It does not claim an Integrated Foundational MVP, production deployment, Stripe/customer-system verification, penetration test, compliance certification, or formal accessibility conformance.
+This status accepts the Version 1.5 Core Development Baseline, the named Supabase test integration,
+and the recorded WCAG 2.2 AA report validation. It does not claim an Integrated Foundational MVP,
+production deployment, Stripe/customer-system verification, penetration test, third-party
+accessibility certification, or a VPAT.
