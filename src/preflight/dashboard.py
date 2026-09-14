@@ -89,10 +89,10 @@ def _layout(title: str, body: str) -> bytes:
 font:1rem/1.55 system-ui,sans-serif;color:var(--ink);background:var(--paper)}}header,main,footer{{
 max-width:72rem;margin:auto;padding:1rem}}header{{display:flex;justify-content:space-between;align-items:center;
 gap:1rem}}a{{color:#005fcc}}.card{{background:var(--card);border:1px solid var(--line);border-radius:.75rem;
-padding:1rem;margin-bottom:1rem}}h1{{font-size:clamp(1.6rem,4vw,2.4rem)}}h2{{font-size:1.2rem}}
+padding:1rem;margin-bottom:1rem;min-width:0}}h1{{font-size:clamp(1.6rem,4vw,2.4rem)}}h2{{font-size:1.2rem}}
 button{{background:var(--accent);color:#fff;border:0;border-radius:.4rem;padding:.65rem 1rem;font:inherit;
 cursor:pointer}}button:focus-visible,a:focus-visible{{outline:3px solid #005fcc;outline-offset:3px}}
-.table-wrap{{overflow-x:auto}}table{{width:100%;border-collapse:collapse}}th,td{{padding:.65rem;text-align:left;
+.table-wrap{{overflow-x:auto;max-width:100%}}code{{overflow-wrap:anywhere}}table{{width:100%;border-collapse:collapse}}th,td{{padding:.65rem;text-align:left;
 border-bottom:1px solid var(--line)}}.PASS{{color:var(--pass)}}.WARN{{color:var(--warn)}}
 .FAIL,.INCOMPLETE{{color:var(--fail)}}.muted{{color:var(--muted)}}.error{{border-left:4px solid var(--fail)}}
 fieldset{{border:0;padding:0;margin:0 0 1rem}}label{{display:inline-block;margin:.25rem .8rem .25rem 0}}
