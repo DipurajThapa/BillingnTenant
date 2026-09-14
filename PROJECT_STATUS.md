@@ -15,6 +15,7 @@
 | C5 | Complete | stateful billing/event/usage scenarios, policy variants and isolated defect variants pass |
 | C6 | Complete | evidence, artifacts and offline HTML pass; native Chromium matrix passes at 320/375/768/1440 px with retained evidence |
 | C7 | Complete | AC-001–014, bidirectional traceability, clean-wheel journey and final CI gates pass |
+| C8 | In validation | local dashboard run/history/evidence slice implemented; Python 3.11 and native browser CI pending |
 
 ## Final validation evidence
 
@@ -60,6 +61,11 @@ SHA-256 `e7d9d21e73db4ba10106cb2d3be123d08803e30f83f96e3465ad536ba4dd29c3`. Stru
 Chromium/Firefox acceptance pass, and Dipuraj Thapa completed all manual checks with NVDA/Chrome and
 Narrator/Edge on Windows 11. The claim is artifact-specific and is not third-party certification or
 a VPAT; any report HTML/CSS change requires revalidation.
+
+Local dashboard increment `DASH-001`/INC-009 is implemented as a `127.0.0.1`-only operator shell.
+It reuses the validated reference engine and artifacts, adds no hosted identity or provider claim,
+and preserves a framework-neutral application-service boundary for later hosted work. Repository
+CI and native Chromium/Firefox evidence are the remaining increment gate.
 
 ## Release boundary
 

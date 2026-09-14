@@ -39,13 +39,15 @@ Preflight is a deterministic assurance engine for testing declared tenant, role,
 - Agency engineer operating an authorized preflight.
 - Future CI system consuming stable exit codes and artifacts.
 
-The current baseline has no hosted user, account, organization, subscription or dashboard.
+The current product has no hosted user, account, organization or subscription. The post-baseline
+local dashboard defined by `DASH-001` is an operator interface, not a hosted control plane.
 
 ### PRD-003 Core Development Baseline
 
 The currently authorized build is a fully working provider-neutral engine validated against an in-process or loopback reference target. It includes:
 
 - Python package and CLI;
+- local-only dashboard behind the existing application-service boundary;
 - strict versioned configuration and artifacts;
 - provider-neutral ports and canonical observations;
 - immutable reference scenario catalog;
@@ -65,7 +67,9 @@ remote HTTP safety and GitHub Actions have separate activation records; none cha
 provenance. Stripe and cPanel remain deferred. External assurance claims are prohibited unless the
 named integration's activation gate and acceptance criteria pass.
 
-GitHub Actions, formal accessibility conformance and cPanel deployment remain independent deferred capabilities and are not required for the Integrated Foundational MVP unless later approved.
+GitHub Actions and artifact-specific accessibility validation have been activated and verified under
+their decision records. cPanel deployment remains an independent deferred capability and is not
+required for the Integrated Foundational MVP unless later approved.
 
 ### PRD-005 Exclusions from the core baseline
 
@@ -382,6 +386,7 @@ Current macOS and Linux on CPython 3.11. Windows is not promised. No performance
 | C5 | Reference billing/event/usage-state scenarios | correct/defect variants; no provider claim |
 | C6 | Console, JSON, HTML | golden/offline/responsive tests |
 | C7 | Traceability and full core acceptance | all core ACs and definition of done |
+| C8 | Local-first dashboard vertical slice | DASH-AC-001–004 |
 
 Deferred work begins only through backlog activation. It cannot be silently added to C1–C7.
 

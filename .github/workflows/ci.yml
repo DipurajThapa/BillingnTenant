@@ -80,6 +80,9 @@ jobs:
       - name: Verify report at required widths
         run: python scripts/verify_report_browser.py
 
+      - name: Verify local dashboard journey at required widths
+        run: python scripts/verify_dashboard_browser.py
+
       - name: Publish browser evidence
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08

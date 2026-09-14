@@ -51,7 +51,8 @@ def test_traceability_resolves_bidirectionally_against_authoritative_sources() -
     verification = Path("docs/spec/02_CORE_VERIFICATION_AND_TRACEABILITY.md")
     supabase = Path("docs/decisions/SUP-001.md")
     accessibility = Path("docs/decisions/A11Y-001.md")
-    for source in (primary, contracts, verification, supabase, accessibility):
+    dashboard = Path("docs/decisions/DASH-001.md")
+    for source in (primary, contracts, verification, supabase, accessibility, dashboard):
         assert source.exists()
 
     material_requirements = {
@@ -93,6 +94,7 @@ def test_traceability_resolves_bidirectionally_against_authoritative_sources() -
         value for value in identifiers(supabase) if re.fullmatch(r"SUP-\d{3}", value)
     }
     material_requirements |= expand("A11Y-REQ-001-004")
+    material_requirements |= expand("DASH-REQ-001-008")
     assert traced_requirements == material_requirements
 
     specified_tests = {
@@ -131,6 +133,7 @@ def test_traceability_resolves_bidirectionally_against_authoritative_sources() -
     specified_tests |= expand("A11Y-AUTO-001-004")
     specified_tests |= expand("A11Y-EVD-001-003")
     specified_tests |= expand("A11Y-MAN-001-010")
+    specified_tests |= expand("DASH-TST-001-005")
     assert traced_tests == specified_tests
 
     specified_acceptance = {value for value in identifiers(verification) if value.startswith("AC-")}
@@ -139,5 +142,8 @@ def test_traceability_resolves_bidirectionally_against_authoritative_sources() -
     }
     specified_acceptance |= {
         value for value in identifiers(accessibility) if value.startswith("A11Y-AC-")
+    }
+    specified_acceptance |= {
+        value for value in identifiers(dashboard) if value.startswith("DASH-AC-")
     }
     assert traced_acceptance == specified_acceptance

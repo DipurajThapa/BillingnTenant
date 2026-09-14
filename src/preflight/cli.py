@@ -16,6 +16,7 @@ from preflight.config import (
     load_config,
     load_reference_overrides,
 )
+from preflight.dashboard import serve_dashboard
 from preflight.engine import execute, render_html, write_artifacts
 from preflight.lifecycle import FixtureJournal, validate_journal
 from preflight.models import RunResult
@@ -192,6 +193,18 @@ def clean(run_id: str) -> None:
         raise typer.Exit(2) from None
     registered = sum(entry.event == "fixture_registered" for entry in entries)
     typer.echo(f"completed; reference fixtures absent registered={registered}")
+
+
+@app.command()
+def dashboard(
+    port: int = typer.Option(8765, min=1024, max=65535),
+) -> None:
+    """Serve the local-only reference dashboard."""
+    try:
+        serve_dashboard(Path.cwd(), port)
+    except OSError as exc:
+        typer.echo(f"DASH_START_FAILED: {type(exc).__name__}", err=True)
+        raise typer.Exit(2) from None
 
 
 def main() -> None:

@@ -93,3 +93,6 @@ entries:
   - requirementId: A11Y-REQ-001-004
     testIds: [A11Y-AUTO-001-004, A11Y-EVD-001-003, A11Y-MAN-001-010]
     acceptanceIds: [A11Y-AC-001, A11Y-AC-002, A11Y-AC-003, A11Y-AC-004]
+  - requirementId: DASH-REQ-001-008
+    testIds: [DASH-TST-001-005]
+    acceptanceIds: [DASH-AC-001, DASH-AC-002, DASH-AC-003, DASH-AC-004]
