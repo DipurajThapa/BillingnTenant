@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import secrets
 import threading
 from http.server import ThreadingHTTPServer
@@ -82,7 +83,14 @@ def check_browser(browser, browser_name: str, base_url: str, output: Path):
     page.on("request", record_request)
     page.goto(base_url, wait_until="load")
     page.get_by_role("button", name="Start verification").click()
-    page.wait_for_url(f"{base_url}/runs/*", wait_until="load")
+    expected_run = re.compile(rf"{re.escape(base_url)}/runs/[0-9a-f]{{32}}$")
+    try:
+        page.wait_for_url(expected_run, wait_until="load", timeout=5000)
+    except Exception as exc:
+        visible = page.locator("body").inner_text()[:1000]
+        raise RuntimeError(
+            f"dashboard run navigation failed: url={page.url!r} body={visible!r}"
+        ) from exc
     run_url = page.url
     gate_visible = page.get_by_text("Decision: PASS", exact=False).is_visible()
     report_link_visible = page.get_by_role(
