@@ -15,7 +15,7 @@
 | C5 | Complete | stateful billing/event/usage scenarios, policy variants and isolated defect variants pass |
 | C6 | Complete | evidence, artifacts and offline HTML pass; native Chromium matrix passes at 320/375/768/1440 px with retained evidence |
 | C7 | Complete | AC-001–014, bidirectional traceability, clean-wheel journey and final CI gates pass |
-| C8 | In validation | local dashboard run/history/evidence slice implemented; Python 3.11 and native browser CI pending |
+| C8 | In validation | local dashboard run/history/evidence slice implemented; Linux Python 3.11 and native Chromium/Firefox CI pass; Windows command gate pending |
 
 ## Final validation evidence
 
@@ -65,7 +65,8 @@ a VPAT; any report HTML/CSS change requires revalidation.
 Local dashboard increment `DASH-001`/INC-009 is implemented as a `127.0.0.1`-only operator shell.
 It reuses the validated reference engine and artifacts, adds no hosted identity or provider claim,
 and preserves a framework-neutral application-service boundary for later hosted work. Repository
-CI and native Chromium/Firefox evidence are the remaining increment gate.
+Python 3.11 plus native Chromium/Firefox dashboard evidence passed in GitHub Actions run
+`34813716692`. A focused Windows Python 3.11 command/contract gate remains before C8 closure.
 
 ## Release boundary
 
