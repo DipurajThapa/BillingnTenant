@@ -15,10 +15,10 @@ See `PROJECT_STATUS.md` for executed evidence, `docs/spec/` for authoritative re
 
 ## Local dashboard quick start
 
-With CPython 3.11:
+With CPython 3.12 (including 3.12.10):
 
 ```bash
-python3.11 -m venv .venv
+python3.12 -m venv .venv
 . .venv/bin/activate
 python -m pip install .
 mkdir preflight-workspace && cd preflight-workspace
