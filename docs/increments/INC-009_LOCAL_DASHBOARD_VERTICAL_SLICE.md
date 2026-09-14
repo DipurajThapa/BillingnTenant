@@ -37,5 +37,5 @@ Actions.
 GitHub Actions run `34814102700` passed all 98 repository tests, lint, clean 0.3.0 wheel build and
 installation, the Chromium/Firefox dashboard matrix at every required width, and the focused
 Windows Python 3.11 dashboard command/contract gate. This is historical 0.3.0 evidence; current
-0.4.0 release evidence must pass the equivalent Python 3.12 gates. The Windows gate does not expand the supported
-core runtime or make a hosted-deployment claim.
+0.4.0 release evidence passed the equivalent Python 3.12 gates in GitHub Actions run `34815053872`.
+The Windows gate does not expand the supported core runtime or make a hosted-deployment claim.
