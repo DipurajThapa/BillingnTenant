@@ -201,7 +201,7 @@ The repository contains `tests/traceability.yml` with schema version `1.0`. Each
 | OPS-003 | Cleanup | Reports retained |
 | OPS-004 | macOS/Linux smoke | CLI starts and reference run works |
 | OPS-005 | Public network spy | Zero DNS/non-loopback socket/provider call |
-| PKG-001 | Clean Python 3.11 wheel install | CLI works; no Node/npm/provider SDK required |
+| PKG-001 | Clean Python 3.12 wheel install | CLI works; no Node/npm/provider SDK required |
 | LIM-001 | Values at hard limits | Accepted/bounded |
 | LIM-002 | Above each hard limit | Config/result rejected |
 | LIM-003 | Evidence exceeds per-scenario size | Typed error/truncation policy: reject item, mark scenario error |
@@ -227,7 +227,7 @@ Unexpected collateral failures block release unless logically inseparable and re
 
 | ID | Completion condition |
 | --- | --- |
-| AC-001 | Built wheel installs/runs on clean Python 3.11 without Node/npm or provider SDK. |
+| AC-001 | Built wheel installs/runs on clean Python 3.12 without Node/npm or provider SDK. |
 | AC-002 | Models, config, ports, limits and diagnostics pass strict unit/contract tests. |
 | AC-003 | Results prove reference provenance and cannot claim external verification. |
 | AC-004 | Init is validated, atomic, non-destructive and follows overwrite/cancel rules. |
@@ -281,4 +281,3 @@ Core Development Baseline is development-ready and releasable only when:
 8. Reports visibly state reference-only scope.
 
 This completion authorizes core-engine development/release only. It does not authorize any external assurance claim.
-
