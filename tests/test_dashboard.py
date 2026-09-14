@@ -44,6 +44,7 @@ def test_dashboard_http_flow_and_security_boundary(tmp_path: Path, monkeypatch) 
             assert "No completed runs yet" in home
             assert "@media(max-width:37.5rem)" in home
             assert response.headers["X-Frame-Options"] == "DENY"
+            assert response.headers["Referrer-Policy"] == "same-origin"
             assert "default-src 'none'" in response.headers["Content-Security-Policy"]
 
         invalid = urllib.request.Request(
