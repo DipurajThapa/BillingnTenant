@@ -3,7 +3,7 @@
 ## Version 1.5 Authoritative Product Development Specification
 
 **Status:** Core Development Baseline approved for implementation  
-**Runtime:** CPython 3.11  
+**Runtime:** CPython 3.12
 **Current verification level:** reference only  
 **External integrations:** separately activated and claimed only at their recorded evidence level
 
@@ -233,7 +233,7 @@ The bundled reference system is deterministic, local and resettable. It includes
 
 ### ARC-005 Runtime and dependencies
 
-CPython 3.11, Typer, Pydantic v2, PyYAML, Jinja2 and pytest are current baseline dependencies. Standard-library async primitives are preferred. An HTTP client is not a required core dependency; a loopback implementation may use an in-process callable transport. `pyproject.toml` uses tested compatible ranges and CI uses an exact constraints file. Releases are tested from a built wheel.
+CPython 3.12, Typer, Pydantic v2, PyYAML, Jinja2 and pytest are current baseline dependencies. Standard-library async primitives are preferred. An HTTP client is not a required core dependency; a loopback implementation may use an in-process callable transport. `pyproject.toml` accepts the tested Python 3.12 release series (`>=3.12,<3.13`), CI uses an exact constraints file, and releases are tested from a built wheel.
 
 ### ARC-006 Concurrency
 
@@ -373,7 +373,7 @@ Run/scenario start/finish, fixture register/delete and cleanup finish include ru
 
 ### OPS-003 Supported platforms
 
-Current macOS and Linux on CPython 3.11. Windows is not promised. No performance SLA before calibration; record durations immediately.
+Current macOS and Linux on CPython 3.12. The local dashboard and installed CLI are additionally verified on Windows with CPython 3.12; the full Windows core platform is not otherwise promised. No performance SLA applies before calibration; record durations immediately.
 
 ## 11. Implementation sequence
 
@@ -395,7 +395,7 @@ Deferred work begins only through backlog activation. It cannot be silently adde
 | ID | Assumption |
 | --- | --- |
 | A-001 | One `src/` Python distribution named `saas-preflight`. |
-| A-002 | CPython 3.11 only for the core baseline. |
+| A-002 | CPython 3.12 only (`>=3.12,<3.13`) for current builds; Python 3.11 evidence remains historical and does not validate current releases. |
 | A-003 | UTC RFC 3339 timestamps. |
 | A-004 | Default concurrency 4 and interruption grace 10 seconds. |
 | A-005 | Reference fixtures are synthetic and contain no personal/customer data. |
