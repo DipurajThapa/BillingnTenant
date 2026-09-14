@@ -1,6 +1,6 @@
 # INC-009: Local dashboard vertical slice
 
-**Status:** Implemented; final cross-platform repository gate pending
+**Status:** Complete
 
 ## Objective and user outcome
 
@@ -34,7 +34,7 @@ published, proxied or reused as a hosted service.
 wheel checks, existing report browser matrix and new dashboard browser matrix to pass in GitHub
 Actions.
 
-The Linux Python 3.11 gate and Chromium/Firefox dashboard matrix passed in GitHub Actions run
-`34813716692`. The remaining release-control gate validates the installed dashboard command and
-focused dashboard contracts on Windows Python 3.11; it does not expand the supported core runtime
-or make a hosted-deployment claim.
+GitHub Actions run `34814102700` passed all 98 repository tests, lint, clean 0.3.0 wheel build and
+installation, the Chromium/Firefox dashboard matrix at every required width, and the focused
+Windows Python 3.11 dashboard command/contract gate. The Windows gate does not expand the supported
+core runtime or make a hosted-deployment claim.
