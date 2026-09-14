@@ -61,7 +61,7 @@ headers.
 - `DASH-AC-003`: non-local binding is not exposed; invalid or cross-origin mutations do not execute;
   missing/corrupt state produces an observable non-success response.
 - `DASH-AC-004`: targeted functional, negative, security, responsive and existing CLI/report
-  regression tests pass on Python 3.11.
+  regression tests pass on Python 3.12.
 
 ## Revisit trigger
 
