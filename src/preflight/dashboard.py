@@ -199,13 +199,18 @@ def make_handler(service: DashboardService, csrf_token: str):
             origin = self.headers.get("Origin")
             allowed_origin = f"http://127.0.0.1:{self.server.server_port}"
             content_type = self.headers.get("Content-Type", "").split(";", 1)[0]
-            if (
-                length < 1
-                or length > MAX_FORM_BYTES
-                or content_type != "application/x-www-form-urlencoded"
-                or (origin and origin != allowed_origin)
-            ):
-                self._send(HTTPStatus.BAD_REQUEST, _layout("Invalid request", "<p>Request rejected.</p>"))
+            rejection = None
+            if length < 1 or length > MAX_FORM_BYTES:
+                rejection = "DASH_REQUEST_SIZE_INVALID"
+            elif content_type != "application/x-www-form-urlencoded":
+                rejection = "DASH_CONTENT_TYPE_INVALID"
+            elif origin and origin != allowed_origin:
+                rejection = "DASH_ORIGIN_INVALID"
+            if rejection:
+                self._send(
+                    HTTPStatus.BAD_REQUEST,
+                    _layout("Invalid request", f"<p>{rejection}: request rejected.</p>"),
+                )
                 return
             try:
                 values = parse_qs(self.rfile.read(length).decode("utf-8", "strict"))

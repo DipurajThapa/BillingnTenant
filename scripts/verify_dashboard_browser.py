@@ -70,6 +70,7 @@ def check_browser(browser, browser_name: str, base_url: str, output: Path):
     page = context.new_page()
     console_errors: list[str] = []
     prohibited_requests: list[str] = []
+    mutation_metadata: list[dict[str, object]] = []
 
     def record_console(message: ConsoleMessage) -> None:
         if message.type == "error":
@@ -78,6 +79,16 @@ def check_browser(browser, browser_name: str, base_url: str, output: Path):
     def record_request(request: Request) -> None:
         if not request.url.startswith((base_url, "data:", "blob:")):
             prohibited_requests.append(request.url)
+        if request.method == "POST":
+            headers = request.headers
+            mutation_metadata.append(
+                {
+                    "url": request.url,
+                    "origin": headers.get("origin"),
+                    "contentType": headers.get("content-type"),
+                    "contentLength": headers.get("content-length"),
+                }
+            )
 
     page.on("console", record_console)
     page.on("request", record_request)
@@ -89,7 +100,8 @@ def check_browser(browser, browser_name: str, base_url: str, output: Path):
     except Exception as exc:
         visible = page.locator("body").inner_text()[:1000]
         raise RuntimeError(
-            f"dashboard run navigation failed: url={page.url!r} body={visible!r}"
+            f"dashboard run navigation failed: url={page.url!r} body={visible!r} "
+            f"mutation={mutation_metadata!r}"
         ) from exc
     run_url = page.url
     gate_visible = page.get_by_text("Decision: PASS", exact=False).is_visible()
