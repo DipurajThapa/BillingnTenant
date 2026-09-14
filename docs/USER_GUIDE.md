@@ -2,15 +2,22 @@
 
 ## Install
 
-Use CPython 3.11. From the repository root:
+Use CPython 3.12 (including 3.12.10). From the repository root:
 
 ```bash
-python3.11 -m venv .venv
+python3.12 -m venv .venv
 . .venv/bin/activate
 python -m pip install .
 ```
 
-On Windows PowerShell, activate with `.\.venv\Scripts\Activate.ps1`.
+On Windows PowerShell, create and activate the environment with:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+Run each command separately. Confirm `python --version` reports Python 3.12 before installation.
 
 ## Initialize a workspace
 
