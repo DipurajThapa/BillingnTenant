@@ -81,6 +81,7 @@ def _layout(title: str, body: str) -> bytes:
     document = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
 <title>{html.escape(title)} · SaaS Preflight</title>
 <style>
 :root{{--ink:#172033;--muted:#526078;--line:#d8dee9;--paper:#f6f4ef;--card:#fff;--accent:#4c1d68;
@@ -163,7 +164,8 @@ def make_handler(service: DashboardService, csrf_token: str):
             self.send_header("Referrer-Policy", "same-origin")
             self.send_header(
                 "Content-Security-Policy",
-                "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'",
+                "default-src 'none'; style-src 'unsafe-inline'; img-src data:; "
+                "form-action 'self'; base-uri 'none'",
             )
             self.end_headers()
             self.wfile.write(body)

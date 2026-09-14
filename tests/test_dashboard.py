@@ -46,6 +46,8 @@ def test_dashboard_http_flow_and_security_boundary(tmp_path: Path, monkeypatch) 
             assert response.headers["X-Frame-Options"] == "DENY"
             assert response.headers["Referrer-Policy"] == "same-origin"
             assert "default-src 'none'" in response.headers["Content-Security-Policy"]
+            assert "img-src data:" in response.headers["Content-Security-Policy"]
+            assert '<link rel="icon" href="data:,">' in home
 
         invalid = urllib.request.Request(
             f"{base}/runs",
