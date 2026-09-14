@@ -15,12 +15,12 @@
 | C5 | Complete | stateful billing/event/usage scenarios, policy variants and isolated defect variants pass |
 | C6 | Complete | evidence, artifacts and offline HTML pass; native Chromium matrix passes at 320/375/768/1440 px with retained evidence |
 | C7 | Complete | AC-001–014, bidirectional traceability, clean-wheel journey and final CI gates pass |
-| C8 | In validation | behavior complete; current 0.4.0 Python 3.12 Linux, browser and Windows release gates pending |
+| C8 | Complete | package 0.4.0 passes Python 3.12 Linux, native Chromium/Firefox and Windows dashboard gates |
 
 ## Final validation evidence
 
 - Previous release evidence: CPython 3.11.16 for package 0.3.0.
-- Current runtime target: CPython 3.12 (`>=3.12,<3.13`); package 0.4.0 validation pending.
+- Current runtime: CPython 3.12 (`>=3.12,<3.13`); package 0.4.0 validation passed.
 - Automated tests: 98 passed, no skips or expected failures.
 - Ruff formatting/linting: passed.
 - Isolated wheel build: passed.
@@ -68,9 +68,14 @@ It reuses the validated reference engine and artifacts, adds no hosted identity 
 and preserves a framework-neutral application-service boundary for later hosted work. Repository
 Python 3.11 plus native Chromium/Firefox dashboard evidence passed in GitHub Actions run
 `34814102700`, together with all 98 repository tests, the clean 0.3.0 wheel, and the focused Windows
-Python 3.11 dashboard command/contract gate. This is historical 0.3.0 evidence. C8 returns to
-validation until equivalent 0.4.0 Python 3.12 gates pass. Windows evidence covers the local dashboard
-workflow only and does not broaden the hosted or external-provider verification claim.
+Python 3.11 dashboard command/contract gate. This is retained only as historical 0.3.0 evidence and
+does not validate the current release.
+
+Current package 0.4.0 evidence is GitHub Actions run `34815053872`: all 98 repository tests, lint,
+clean Python 3.12 wheel installation, Chromium/Firefox responsive dashboard journeys, and the
+focused Windows Python 3.12 dashboard command/contract gate passed. Windows evidence covers the
+local dashboard workflow only and does not broaden the hosted or external-provider verification
+claim.
 
 ## Release boundary
 
