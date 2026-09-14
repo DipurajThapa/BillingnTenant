@@ -30,11 +30,12 @@ published, proxied or reused as a hosted service.
 ## Validation gate
 
 `DASH-REQ-001` through `DASH-REQ-008` map to `DASH-TST-001` through `DASH-TST-005` and
-`DASH-AC-001` through `DASH-AC-004`. Completion requires the full Python 3.11 repository suite,
+`DASH-AC-001` through `DASH-AC-004`. Completion requires the full Python 3.12 repository suite,
 wheel checks, existing report browser matrix and new dashboard browser matrix to pass in GitHub
 Actions.
 
 GitHub Actions run `34814102700` passed all 98 repository tests, lint, clean 0.3.0 wheel build and
 installation, the Chromium/Firefox dashboard matrix at every required width, and the focused
-Windows Python 3.11 dashboard command/contract gate. The Windows gate does not expand the supported
+Windows Python 3.11 dashboard command/contract gate. This is historical 0.3.0 evidence; current
+0.4.0 release evidence must pass the equivalent Python 3.12 gates. The Windows gate does not expand the supported
 core runtime or make a hosted-deployment claim.
